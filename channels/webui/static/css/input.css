@@ -161,7 +161,6 @@ body.token-bar-hidden .input-area {
     background: var(--bg-tertiary);
     color: var(--accent);
     border-color: var(--accent);
-    transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(var(--accent-rgb, 171, 171, 171), 0.3);
 }
 
