@@ -1,8 +1,7 @@
 /* ==========================================================================
- *  Sidebar Base Styles
- * ========================================================================== */
+ *  Sidebar Base Styles - Modern Design
+ *  ========================================================================== */
 .sidebar {
-    /* Use fit-content on desktop so it shrinks when children shrink */
     width: fit-content;
     min-width: 0;
     height: 100%;
@@ -11,7 +10,7 @@
     display: flex;
     flex-direction: column;
     z-index: 100;
-    transition: width 0.3s ease, min-width 0.3s ease, transform 0.3s ease;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.3s ease, transform 0.3s ease;
 }
 
 .sidebar.collapsed {
@@ -29,11 +28,11 @@
 }
 
 .sidebar-title {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 600;
     color: var(--text-secondary);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.8px;
 }
 
 .sidebar-content {
@@ -47,6 +46,7 @@
     border-top: 1px solid var(--border-sidebar);
 }
 
+/* New Chat Button - Modern Style */
 .new-chat-btn {
     width: 100%;
     padding: 12px 16px;
@@ -57,7 +57,7 @@
     font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -65,8 +65,9 @@
 }
 
 .new-chat-btn:hover {
-    filter: brightness(1.1);
+    filter: brightness(1.15);
     transform: translateY(-1px);
+    box-shadow: var(--shadow-soft);
 }
 
 .new-chat-btn svg {
@@ -76,7 +77,7 @@
 
 /* ==========================================================================
  *  Two-Pane Sidebar Layout (Shared Structure)
- * ========================================================================== */
+ *  ========================================================================== */
 .sidebar-inner-container {
     display: flex;
     height: 100%;
@@ -87,7 +88,7 @@
 
 /* -----------------------------------------------------------------------------
  *  Pane 1: Category Navigator
- * ----------------------------------------------------------------------------- */
+ *  ----------------------------------------------------------------------------- */
 .category-pane {
     width: 160px;
     min-width: 160px;
@@ -106,9 +107,9 @@
 }
 
 .category-header h3 {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
     color: var(--text-muted);
     font-weight: 600;
 }
@@ -163,9 +164,8 @@
 
 /* -----------------------------------------------------------------------------
  *  Pane 2: Chat List
- * ----------------------------------------------------------------------------- */
+ *  ----------------------------------------------------------------------------- */
 .chat-pane {
-    /* Fixed width prevents it from expanding when category pane shrinks */
     flex: none;
     width: 300px;
     display: flex;
@@ -204,13 +204,13 @@
 }
 
 #chat-pane-title {
-font-size: 1rem;
-font-weight: 600;
-color: var(--text-primary);
-white-space: nowrap;
-overflow: hidden;
-text-overflow: ellipsis;
-pointer-events: none;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
 }
 
 .category-group-header {
@@ -224,7 +224,7 @@ pointer-events: none;
     font-size: 0.7rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
 }
 
 .category-group-header .chevron {
@@ -249,9 +249,8 @@ pointer-events: none;
 
 /* ==========================================================================
  *  Mobile Styles (< 768px) - Fullscreen Sidebar
- * ========================================================================== */
+ *  ========================================================================== */
 @media (max-width: 768px) {
-    /* 1. Sidebar fills the entire screen */
     .sidebar {
         position: fixed;
         left: 0;
@@ -268,13 +267,11 @@ pointer-events: none;
         transform: translateX(0);
     }
 
-    /* 2. Inner Container fills the sidebar */
     .sidebar-inner-container {
         width: 100%;
         height: 100%;
     }
 
-    /* 3. Panes stack and slide correctly */
     .category-pane,
     .chat-pane {
         position: absolute;
@@ -284,10 +281,8 @@ pointer-events: none;
         min-width: 100% !important;
         height: 100%;
         border: none;
-        /* On mobile, chat pane should flex to fill if needed, but absolute positioning handles it */
     }
 
-    /* Default state: Chat pane visible, Category pane hidden */
     .chat-pane {
         transform: translateX(0);
         z-index: 2;
@@ -298,17 +293,14 @@ pointer-events: none;
         z-index: 1;
     }
 
-    /* When Category is open, slide it in */
     .category-pane.open {
         transform: translateX(0);
     }
 
-    /* Push Chat pane out when Category is open */
     .category-pane.open ~ .chat-pane {
         transform: translateX(100%);
     }
 
-    /* Header Interaction Styles */
     .chat-pane-header {
         background: linear-gradient(180deg, var(--bg-tertiary) 0%, var(--bg-sidebar) 100%);
         display: flex;
@@ -318,7 +310,6 @@ pointer-events: none;
         display: block;
     }
 
-    /* Hide the category handle on mobile */
     .category-handle {
         display: none;
     }
@@ -326,12 +317,11 @@ pointer-events: none;
 
 /* ==========================================================================
  *  Desktop Styles (>= 769px)
- * ========================================================================== */
+ *  ========================================================================== */
 @media (min-width: 769px) {
     .sidebar {
         position: relative;
         transform: none;
-        /* On desktop, width is determined by children (fit-content) */
         width: fit-content;
         min-width: 0;
     }
@@ -367,25 +357,17 @@ pointer-events: none;
     .chat-pane {
         position: relative;
         flex: none;
-        width: 300px; /* Fixed width prevents expansion */
+        width: 300px;
         transform: none;
     }
 
-    /* Hide the category header on desktop to save space */
     .chat-pane-header {
         display: none;
     }
 
-    /* Remove the 'open' class logic for desktop if it's not used */
     .category-pane.open,
     .category-pane.open ~ .chat-pane {
         transform: none;
-    }
-
-    /* Desktop Handle */
-    .sidebar-inner-container {
-        display: flex;
-        align-items: stretch;
     }
 
     .category-handle {
@@ -419,8 +401,8 @@ pointer-events: none;
 }
 
 /* ==========================================================================
- *  Chat List & Items
- * ========================================================================== */
+ *  Chat List & Items - Modern Design
+ *  ========================================================================== */
 .chat-list {
     display: flex;
     flex-direction: column;
@@ -433,7 +415,7 @@ pointer-events: none;
     border: 1px solid transparent;
     border-radius: var(--radius-md);
     cursor: pointer;
-    transition: all 0.15s;
+    transition: all 0.15s ease;
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -442,11 +424,13 @@ pointer-events: none;
 .chat-item:hover {
     background: var(--bg-secondary);
     border-color: var(--border-color);
+    transform: translateX(2px);
 }
 
 .chat-item.active {
     background: var(--bg-secondary);
     border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent-glow);
 }
 
 .chat-item-title {
@@ -455,6 +439,7 @@ pointer-events: none;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-weight: 500;
 }
 
 .chat-item-meta {
@@ -523,7 +508,7 @@ pointer-events: none;
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
 }
 
 .chat-group-header:hover {
@@ -561,7 +546,7 @@ pointer-events: none;
 
 /* ==========================================================================
  *  Sidebar Overlay
- * ========================================================================== */
+ *  ========================================================================== */
 .sidebar-overlay {
     position: fixed;
     inset: 0;
@@ -579,7 +564,7 @@ pointer-events: none;
 
 /* ==========================================================================
  *  Hybrid Sidebar Layout (Category Strip)
- * ========================================================================== */
+ *  ========================================================================== */
 .sidebar-container {
     display: flex;
     height: 100%;
@@ -589,18 +574,18 @@ pointer-events: none;
 }
 
 #sidebar-nav-strip {
-width: 60px;
-min-width: 60px;
-background: var(--bg-dark);
-border-right: 1px solid var(--border-light);
-display: flex;
-flex-direction: column;
-align-items: center;
-padding: 10px 0;
-gap: 5px;
-overflow-y: auto;
-overflow-x: hidden;
-z-index: 5;
+    width: 60px;
+    min-width: 60px;
+    background: var(--bg-dark);
+    border-right: 1px solid var(--border-light);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 0;
+    gap: 5px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 5;
 }
 
 .category-btn {
@@ -637,7 +622,7 @@ z-index: 5;
 
 /* ==========================================================================
  *  Sidebar Search & Tags
- * ========================================================================== */
+ *  ========================================================================== */
 .sidebar-search {
     padding: 10px;
     border-bottom: 1px solid var(--border-sidebar);
@@ -650,19 +635,20 @@ z-index: 5;
 .sidebar-search-input {
     flex: 1;
     min-width: 0;
-    padding: 8px 12px;
+    padding: 9px 12px;
     background: var(--bg-tertiary);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     color: var(--text-primary);
     font-size: 0.85rem;
     outline: none;
-    transition: border-color 0.2s;
+    transition: all 0.2s ease;
     height: 36px;
 }
 
 .sidebar-search-input:focus {
     border-color: var(--accent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 15%, transparent);
 }
 
 .chat-item.hidden-by-search,
@@ -684,7 +670,7 @@ z-index: 5;
     border-radius: var(--radius-md);
     color: var(--text-muted);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -779,7 +765,7 @@ z-index: 5;
 
 /* ==========================================================================
  *  Drag and Drop Styling
- * ========================================================================== */
+ *  ========================================================================== */
 .chat-item {
     cursor: default;
     user-select: none;
@@ -802,10 +788,9 @@ z-index: 5;
     color: var(--bg-primary);
 }
 
-
 /* ==========================================================================
  *  Category Pane Footer
- * ========================================================================== */
+ *  ========================================================================== */
 .category-footer {
     padding: 12px;
     border-top: 1px solid var(--border-sidebar);
@@ -824,7 +809,7 @@ z-index: 5;
     justify-content: center;
     gap: 8px;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
     font-size: 0.9rem;
 }
 

@@ -1,118 +1,124 @@
 /* ==========================================================================
- *  Input Area
+ *  Input Area - Modern Design
  *  ========================================================================== */
 .input-area {
-    padding: 16px;
+    padding: 20px;
     background: var(--bg-primary);
     display: flex;
     gap: 12px;
     align-items: flex-end;
     flex-shrink: 0;
+    border-top: 1px solid var(--border-color);
 }
 
+/* Upload Button */
 #upload {
-padding: 14px 16px;
-background: var(--bg-tertiary);
-border: 1px solid var(--border-color);
-border-radius: var(--radius-full);
-color: var(--text-secondary);
-cursor: pointer;
-transition: all 0.2s;
-display: flex;
-align-items: center;
-justify-content: center;
-flex-shrink: 0;
+    padding: 14px 16px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-full);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
 #upload:hover {
-background: var(--bg-secondary);
-color: var(--accent);
-border-color: var(--accent);
+    background: var(--bg-secondary);
+    color: var(--accent);
+    border-color: var(--accent);
+    transform: scale(1.05);
 }
 
 #upload svg {
-width: 20px;
-height: 20px;
+    width: 20px;
+    height: 20px;
 }
 
 #file-input {
-display: none;
+    display: none;
 }
 
+/* Message Input - Pill Shape */
 #message {
-flex: 1;
-padding: 12px 18px;
-border: 1px solid var(--border-color);
-border-radius: var(--radius-full);
-background: var(--bg-input);
-color: var(--text-primary);
-font-size: 1rem;
-outline: none;
-transition: all 0.2s;
-resize: none;
-min-height: 48px;
-max-height: 200px;
-font-family: inherit;
-line-height: 1.4;
+    flex: 1;
+    padding: 14px 20px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-full);
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.2s ease;
+    resize: none;
+    min-height: 48px;
+    max-height: 200px;
+    font-family: inherit;
+    line-height: 1.5;
 }
 
 #message:focus {
-border-color: var(--accent);
-box-shadow: 0 0 0 3px var(--accent-glow);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
 #message::placeholder {
-color: var(--text-muted);
+    color: var(--text-muted);
 }
 
 #message:disabled {
-opacity: 0.5;
-cursor: not-allowed;
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
+/* Send Button */
 #send, #stop {
-padding: 14px 24px;
-border-radius: var(--radius-full);
-font-size: 1rem;
-font-weight: 600;
-cursor: pointer;
-transition: all 0.15s ease;
-flex-shrink: 0;
+    padding: 14px 28px;
+    border-radius: var(--radius-full);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
 }
 
 #send {
-background: var(--button-bg);
-border: 1px solid var(--accent);
-color: var(--text-primary);
+    background: var(--button-bg);
+    border: 1px solid var(--accent);
+    color: var(--text-primary);
 }
 
 #send.hidden { display: none; }
 
 #stop:hover {
-background: var(--button-stop-hover);
-box-shadow: 0 0 15px var(--button-stop-glow);
+    background: var(--button-stop-hover);
+    box-shadow: 0 0 15px var(--button-stop-glow);
 }
 
 #send:active { transform: scale(0.96); }
 #send:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
 #stop {
-background: var(--error-bg);
-border: 1px solid var(--error-border);
-color: var(--error);
-display: none;
+    background: var(--error-bg);
+    border: 1px solid var(--error-border);
+    color: var(--error);
+    display: none;
 }
 
 #stop:hover {
-background: linear-gradient(135deg, #5a2a2a 0%, #4a1a1a 100%);
-box-shadow: 0 0 15px rgba(248, 113, 113, 0.3);
+    background: linear-gradient(135deg, #5a2a2a 0%, #4a1a1a 100%);
+    box-shadow: 0 0 15px rgba(248, 113, 113, 0.3);
 }
 
 #stop:active { transform: scale(0.96); }
 #stop.show { display: block; }
 
+/* Token Usage Bar */
 .token-usage-container {
-    position: relative; /* Added: This allows the text to anchor to this container */
+    position: relative;
     padding: 0;
     margin: 0;
     display: flex;
@@ -123,49 +129,45 @@ box-shadow: 0 0 15px rgba(248, 113, 113, 0.3);
     background: var(--bg-primary);
 }
 
-/* This class will be added by JS when usage is high */
 .token-usage-container.active {
     opacity: 1;
 }
 
 .token-usage-bar-bg {
     flex-grow: 1;
-    height: 2px;
+    height: 3px;
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 0px;
+    border-radius: var(--radius-full);
     overflow: hidden;
 }
 
 .token-usage-bar-fill {
     height: 100%;
     width: 0%;
-    background: #10b981; /* Green */
+    background: linear-gradient(90deg, #10b981, #34d399);
+    border-radius: var(--radius-full);
     transition: width 0.5s ease, background-color 0.5s ease;
 }
 
 .token-usage-text {
     position: absolute;
-    right: 12px;        /* Offsets it from the right edge */
-    transform: translateY(-5px); /* Nudges it up slightly so it "floats" with breathing room */
-
+    right: 12px;
+    transform: translateY(-5px);
     font-size: 9px;
     line-height: 1;
     white-space: nowrap;
     min-width: fit-content;
 }
 
-/* High usage text color */
 .token-usage-container.active .token-usage-text {
     color: rgba(255, 255, 255, 1);
 }
 
-
-/* Add a border to the input area when the token bar is hidden */
 body.token-bar-hidden .input-area {
     border-top: 1px solid var(--border-color);
 }
 
-/* Streaming Status Indicator Styles */
+/* Streaming Status Indicator */
 .streaming-status-indicator {
     font-size: 0.8rem;
     color: var(--text-secondary, #888);
@@ -176,9 +178,12 @@ body.token-bar-hidden .input-area {
     display: inline-block;
 }
 
-/* Optimistic UI Styles */
+@keyframes streamingFadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
-/* The temporary user message */
+/* Optimistic UI Styles */
 .user-placeholder {
     opacity: 0.7;
     filter: grayscale(0.5);
@@ -191,15 +196,13 @@ body.token-bar-hidden .input-area {
     font-style: italic;
 }
 
-/* Refined Typing Status Styles (Above the dots) */
-
 .typing-status-text {
     display: block;
     text-align: center;
     font-size: 0.75rem;
     color: var(--text-secondary, #888);
-    margin-bottom: 4px; /* Space below the text, before the dots */
-    margin-top: 0;      /* No space above the text */
+    margin-bottom: 4px;
+    margin-top: 0;
     font-style: italic;
     width: 100%;
     animation: statusFadeIn 0.2s ease-out;
@@ -210,7 +213,6 @@ body.token-bar-hidden .input-area {
 }
 
 @keyframes statusFadeIn {
-    from { opacity: 0; transform: translateY(2px); } /* Slight slide down into place */
+    from { opacity: 0; transform: translateY(2px); }
     to { opacity: 1; transform: translateY(0); }
 }
-
