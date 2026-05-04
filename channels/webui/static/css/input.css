@@ -24,7 +24,7 @@ body.token-bar-hidden .input-area {
     height: 48px;
     background: var(--bg-tertiary);
     border: 1px solid var(--border-color);
-    border-radius: var(--radius-full);
+    border-radius: var(--radius-md);
     color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.2s ease;
@@ -59,7 +59,7 @@ body.token-bar-hidden .input-area {
     height: 48px; 
     min-height: auto;
     border: 1px solid var(--border-color);
-    border-radius: var(--radius-full);
+    border-radius: var(--radius-lg);
     background: var(--bg-input);
     color: var(--text-primary);
     font-size: 1rem;
@@ -99,7 +99,7 @@ body.token-bar-hidden .input-area {
 #send, #stop {
     padding: 0 24px; 
     height: 48px; 
-    border-radius: var(--radius-full);
+    border-radius: var(--radius-lg);
     font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
@@ -145,7 +145,7 @@ body.token-bar-hidden .input-area {
 
 /* Token Usage Bar - Slim & Replaces Top Border */
 .token-usage-container {
-    height: 24px; /* Slim profile */
+    height: 4px; /* Slim profile */
     display: flex;
     align-items: center;
     justify-content: space-between;
