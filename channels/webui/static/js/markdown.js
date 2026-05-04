@@ -8,7 +8,13 @@ marked.setOptions({
 });
 
 function renderMarkdown(text) {
-    return marked.parse(text);
+    // parse markdown
+    const rendered = marked.parse(text);
+
+    // and protect against XSS
+    const clean = DOMPurify.sanitize(rendered);
+
+    return clean;
 }
 
 function highlightCode(element) {

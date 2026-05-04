@@ -234,15 +234,13 @@ body.token-bar-hidden .input-area {
     width: 100%;
     height: 1px; /* Ultra-slim track */
     background: var(--border-color);
-    border-radius: var(--radius-sm);
     overflow: hidden;
 }
 
 .token-usage-bar-fill {
     height: 100%;
     width: 0%;
-    background: linear-gradient(90deg, var(--accent), var(--border-color)); /* Sleek gradient */
-    border-radius: var(--radius-sm);
+    background: var(--accent) !important; /* Sleek gradient */
     transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     position: relative;
     overflow: hidden;
@@ -280,7 +278,7 @@ body.token-bar-hidden .input-area {
     transition: color 0.2s ease;
     text-align: right;
     margin-right: 10px;
-    bottom: 0.4rem;
+    bottom: 0.45rem;
 }
 
 /* Warning state for high token usage */
