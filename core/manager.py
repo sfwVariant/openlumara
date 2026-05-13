@@ -133,10 +133,9 @@ class Manager:
         core.log("core", "Startup complete")
 
         if "webui" in enabled_channels:
-            host = core.config.get("channels").get("settings").get("webui").get("host")
-            port = core.config.get("channels").get("settings").get("webui").get("port")
+            webui_url = self.channels["webui"].url
             print(flush=True)
-            print(f"Please open the WebUI at http://{host}:{port}", flush=True)
+            print(f"Please open the WebUI at {webui_url}", flush=True)
 
         try:
             await asyncio.gather(*self._async_tasks, return_exceptions=should_swallow_exceptions)
@@ -292,7 +291,11 @@ class Manager:
                 continue
 
             char_modules_exempt = ["characters"]
-            if self.modules.get("writing_style") and self.modules["characters"].config.get("use_writing_style"):
+            if (
+                self.modules.get("writing_style") and
+                self.modules.get("characters") and
+                self.modules["characters"].config.get("use_writing_style")
+            ):
                 char_modules_exempt.append("writing_style")
 
             if active_character and module_name not in char_modules_exempt and "characters" in self.modules.keys():
