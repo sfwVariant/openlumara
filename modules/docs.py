@@ -42,7 +42,11 @@ class Docs(core.module.Module):
     async def read(self, topic: str, subject: str = None):
         """Reads documentation about a specific subject within a specific topic. 
         If the subject is not provided or is a folder, it returns a list of available subjects.
-        If the subject is a file, it returns the content."""
+        If the subject is a file, it returns the content.
+
+        ALWAYS start with ONLY a topic first, without a subject. Then drill down deeper.
+
+        """
 
         if not self._find_topic(topic):
             return self.result("Documentation about that topic was not found. Please rely on your own knowledge or try a web search if available.", success=False)

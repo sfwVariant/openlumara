@@ -66,6 +66,9 @@ class Config(core.module.Module):
                     current[key] = {}
                 current = current[key]
 
+            if isinstance(current, dict):
+                return self.result("That is a settings group. Please list its keys.")
+
             # Set the final value
             current[path[-1]] = typed_value
 

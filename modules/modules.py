@@ -15,6 +15,10 @@ class Modules(core.module.Module):
         }
     }
 
+    async def on_startup(self):
+        if not self.config.get("allow_ai_to_toggle"):
+            self.disabled_tools.append("toggle")
+
     async def on_system_prompt(self):
         module_list = {
             "enabled": ", ".join(core.config.get("modules", "enabled", default=[])),
@@ -23,17 +27,20 @@ class Modules(core.module.Module):
         return str(module_list)
 
     async def toggle(self, name: str):
+        if not self.config.get("allow_ai_to_toggle"):
+            return self.result("Module toggling is disabled for security. Ask user to manually toggle the module via the web ui or `/config` or by editing the config file.")
+
         module_name = name.lower().strip()
         if name == "modules":
             return "module manager can only be manually turned off by using the settings dialog, the `/module` command, or editing the config file. user needs to know what you're doing!"
 
-        if self.manager.toggle_module(name):
+        if await self.manager.toggle_module(name):
             return self.result("Module has been toggled. Remind user to use `/restart` to apply changes")
         else:
             return self.result("That module does not exist!", success=false)
 
-    async def get_settings_docs(self, module_name: str):
-        """Returns the settings structure for any given module. Use this if user wants to know how to set up or use a specific module."""
+    async def get_help(self, module_name: str):
+        """Returns documentation for any given module. Use this if user wants to know how to set up or use a specific module. Prefer over docs_read() for module questions."""
 
         structure = core.config.get_module_structure()
 
