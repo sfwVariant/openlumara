@@ -4,7 +4,7 @@ Want to take your AI assistant on the go? The Telegram channel is perfect for th
 
 ### Why you'll love it:
 
-- **Feels Like Real Chat**: It's a seamless, real-time experience. You'll even see a 'typing...' indicator when the AI is thinking!
+- **Feels Like Real Chat**: It's a seamless, real-time experience.
 - **Quick Commands**: You can use commands like `/stop` to immediately interrupt the AI if you need to change course.
 - **Visual Tool Calls**: If the AI uses a special tool, it will show you exactly what it's doing in a clear, easy-to-read way.
 

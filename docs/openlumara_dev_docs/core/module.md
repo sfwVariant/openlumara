@@ -34,11 +34,13 @@ Modules can register custom commands that bypass the AI entirely.
 ## Implementation Example
 
 ```python
+# You must ALWAYS import core at the very top of the file
 import core
 
 class MyAwesomeModule(core.module.Module):
     """
     A sample module demonstrating core features.
+    This module docstring shows up in the WebUI!
     """
     settings = {
         "enable_system_prompt": {
@@ -54,11 +56,19 @@ class MyAwesomeModule(core.module.Module):
                 "uwu": "Makes your AI say uwu all the time!",
                 "nag": "Makes your AI nag you a lot"
             }
+        },
+        "allow_ping": {
+            "description": "Whether to allow the AI to use the ping tool",
+            "default": True
         }
     }
 
     async def on_ready(self):
         await self.manager.channel.push("Awesome Module is online!")
+        
+        if not self.config.get("allow_ping"):
+            # disabled_tools is defined in core.module.Module and tells the framework to disable that tool
+            self.disabled_tools.append("ping")
 
     async def on_system_prompt(self):
         match self.config.get("sysprompt_style"):
@@ -67,7 +77,7 @@ class MyAwesomeModule(core.module.Module):
             case "uwu":
                 return "You MUST say uwu a lot"
             case "nag":
-                return "nag the user about their taxes"
+                return "Nag the user about their taxes"
             case _:
                 return None
 
@@ -80,15 +90,19 @@ class MyAwesomeModule(core.module.Module):
             return "Pong!"
         elif len(args) >= 1 and args[1] == "cookie":
             return "heres a cookie! :3"
-
-    async def my_useful_tool(self, input_text: str):
+            
+    async def ping(self, latency: int):
         """
         This is a tool the AI can use.
+        Simulates a ping to the user.
         
         Args:
-            input_text: The text to process.
+            latency: The latency to set for the simulated ping
         """
-        return self.result(f"Processed: {input_text}", success=True)
+        if not self.config.get("allow_ping"):
+            return self.result("Ping is disabled for security", success=False)
+        
+        return self.result(f"Pong! latency: {latency}", success=True)
 ```
 
 ## Module Configuration
@@ -96,4 +110,42 @@ class MyAwesomeModule(core.module.Module):
 Each module can define its own `settings` dictionary. These settings are:
 1.  Defined in the module class.
 2.  Persisted in the `config.yml` file.
-3.  Accessible via `self.config.get("key")`.
+3.  Accessible via `self.config.get("key")`
+
+---
+
+# Core: How modules are loaded (`core.Modules`)
+The `core.modules` file provides the engine for OpenLumara's extensibility. It is responsible for dynamically discovering, importing, and identifying the various modules and channels that make up the system.
+
+## Dynamic Discovery
+
+Instead of hardcoding every possible module or channel, OpenLumara uses filesystem scanning to find them. This allows users to simply drop a new `.py` file into the `modules/`, `user_modules/`, or `channels/` directory, and the system will automatically pick it up on the next restart. Modules created by Lumara or by the user must be placed in the `user_modules/` directory.
+
+The `load()` function performs the following steps:
+1.  **Package Scanning**: Uses `pkgutil` to iterate through all sub-modules within a given package (like `modules/` or `channels/`).
+2.  **Conditional Import**: Only imports modules that are present in the `filter` list (e.g., only the modules enabled in `config.yml`).
+3.  **Class Inspection**: Once a module is imported, it scans the module for any classes that inherit from a specified `base_class` (like `core.module.Module` or `core.channel.Channel`).
+4.  **Filtering**: Ensures that only valid, relevant classes are returned to the `Manager`.
+
+## Naming Convention
+
+To ensure consistency across the framework, OpenLumara automatically converts Pythonic `CamelCase` class names into `snake_case` names. This is used for:
+- Identifying modules in the configuration file.
+- Mapping module names to tool names.
+- Creating a unified internal registry.
+
+**Example**:
+- Class: `LifeOrganizer` $\rightarrow$ Module Name: `life_organizer`
+- Class: `TelegramChannel` $\rightarrow$ Channel Name: `telegram_channel`
+
+## Key Functions
+
+| Function | Description |
+| :--- | :--- |
+| `load(package, base_class, filter, reload)` | The core engine for discovering and importing classes from a package. |
+| `get_name(obj)` | Converts a class name into its `snake_case` identifier. |
+
+## Non-Agentic Modules
+
+The `modules.nonagentic` tuple contains a list of module names that are considered "non-agentic." These modules (such as `characters` or `time`) are special because their prompts are injected into the context window even when the AI's "tool use" capability is turned off. This ensures that essential framework awareness is always present.
+

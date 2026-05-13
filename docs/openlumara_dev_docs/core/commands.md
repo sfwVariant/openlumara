@@ -20,7 +20,7 @@ OpenLumara distinguishes between two main types of commands:
 4.  **Routing**:
     - If it's a built-in command, the `match` statement executes the corresponding logic.
     - If it's a module command, the system scans the `_command_registry` to find the correct module instance and method to call.
-5.  **Context Insertion**: To ensure the user can see what they did, the command and its result are added to the chat history, but they are flagged as "ghost" messages so they don't clutter the AI's context window.
+5.  **Context Insertion**: To ensure the user can see what they did, the command and its result are added to the chat history, but they are flagged as "ghost" messages so they don't clutter the AI's context window. They can, however, be added to context if the user wants the AI to be able to respond to the commands, by setting send_to_ai to True in the command decorator.
 
 ## Key Features
 
@@ -38,10 +38,18 @@ import core
 
 class MyModule(core.module.Module):
     
-    @core.module.command("my_cmd", help="A description of what this does")
-    async def my_cmd(self, args: list):
+    @core.module.command("ping", help={
+        "": "Checks if the module is responsive",
+        "cookie": "gives you a cookie"
+    })
+    async def ping_command(self, args: list):
         """The actual logic of the command"""
-        return f"You sent: {args}"
+        
+        # args is split by word using shlex.split(). index 0 is the first argument to the command, not the command name itself.
+        if not args:
+            return "Pong!"
+        elif len(args) >= 1 and args[1] == "cookie":
+            return "heres a cookie! :3"
 ```
 
 ## Built-in Command Examples
