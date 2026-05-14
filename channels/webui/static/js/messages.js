@@ -206,9 +206,6 @@ function renderSingleMessage(msg, index, animate) {
 
     let wrapperClass, msgClass;
 
-    console.log(signal);
-    console.log(msg);
-
     if (signal) {
         if (signal === "SUMMARIZATION_CUTOFF") {
             wrapperClass = "signal";
