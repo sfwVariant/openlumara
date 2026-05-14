@@ -107,17 +107,18 @@ class Channel:
 
         role = message.get("role")
 
+        show_reasoning = self.config.get("show_reasoning")
         reasoning_content = None
 
         if role in ("user", "assistant"):
-            if self.config.get("show_reasoning"):
+            if show_reasoning:
                 reasoning_content = message.get("reasoning_content")
                 if reasoning_content:
                     formatted += f"**Reasoning:**\n{reasoning_content}\n\n"
 
             content = message.get("content")
             if content:
-                if reasoning_content:
+                if reasoning_content and show_reasoning:
                     formatted += "**Conclusion**:\n"
 
                 formatted += f"{content}\n\n"
