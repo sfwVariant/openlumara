@@ -12,6 +12,7 @@ itsdangerous
 fastapi
 uvicorn
 websockets
+python-multipart
 beautifulsoup4
 discord.py
 python-telegram-bot
