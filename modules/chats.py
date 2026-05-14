@@ -80,3 +80,36 @@ class Chats(core.module.Module):
         if not found:
             return self.result("no results found")
         return self.result(found)
+
+
+    async def _compress(self):
+        await self.manager.channel.push("Compressing your chat history..")
+        context = await self.manager.channel.context.get()
+
+        # use API.send() to skip all the usual convenience logic
+        response = await self.manager.API.send(context+[{"role": "user", "content": "Please summarize our conversation so far up to this point."}], use_tools=False, use_thinking=False)
+
+        if not response:
+            return None
+
+        # add special cutoff message that gets handled by the context manager
+        await self.manager.channel.context.chat.add(self.manager.channel.context.SUMMARIZATION_CUTOFF)
+
+        # add AI's summarization
+        await self.manager.channel.context.chat.add({"role": "assistant", "content": response.get("content")})
+
+        return True
+
+    @core.module.command("compress")
+    async def cmd_compress(self, args: list):
+        """compress your chat history by summarizing it"""
+        compressed = await self._compress()
+        if not compressed:
+            return "failed to compress chat"
+
+        return "Chat history compressed."
+
+    async def compact(self):
+        """Will compress current chat's history down to a summary. Use if user wants to compress context down when the token limit is approaching."""
+        await self._compress()
+        return self.result("Chat history compressed.")

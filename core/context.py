@@ -2,6 +2,10 @@ import core
 import copy
 
 class Context:
+    # special message type (not intended to be added to context) that
+    # will cause context.get() to cut off messages before this cutoff point
+    SUMMARIZATION_CUTOFF = {"signal": "SUMMARIZATION_CUTOFF"}
+
     def __init__(self, channel):
         self.channel = channel
 
@@ -38,6 +42,18 @@ class Context:
         # Get history from the chat (the full, untrimmed version)
         messages = copy.deepcopy(await self.chat.get())
 
+        # we need to support chat summarization without losing the user-facing end of chat history
+        # so that we can cut context without actually losing our logs..
+
+        # so, i'm using a special entry in the messages array that serves as a cutoff point
+        # from which to actually return the chat history
+
+        # find the last occurence of it and return only the messages from that point onward
+        for i in range(len(messages) - 1, -1, -1):
+            if messages[i].get("signal", "") == "SUMMARIZATION_CUTOFF":
+                messages = [{"role": "user", "content": "Summarize our chat so far"}]+messages[i:]
+                break
+
         # Remove ghost messages from history
         messages = [msg for msg in messages if not msg.get("ghost")]
 
@@ -56,6 +72,10 @@ class Context:
         if messages:
             merged_messages = []
             for msg in messages:
+                if "signal" in msg.keys():
+                    # skip special signal messages which are internal system messages like summarization cutoff
+                    continue
+
                 if merged_messages and msg.get("role") == "assistant" and merged_messages[-1].get("role") == "assistant":
                     # Merge content
                     prev_content = merged_messages[-1].get("content")

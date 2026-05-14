@@ -23,6 +23,7 @@ class Chat:
         self.current = None
         self.current_save_path = os.path.join(core.get_data_path(), f"{self.channel.name}_current_chat")
         self.using_api_token_data = False # gets instantly set to True upon first receive of token usage data
+        self.token_encoding = None
 
         for index in range(len(self.data) - 1, -1, -1):
             chat = self.data[index]
@@ -52,7 +53,7 @@ class Chat:
             except:
                 # If tiktoken fails to load (e.g. no internet and no cache), we set to None
                 # count_tokens will handle the fallback
-                self.token_encoding = None
+                pass
 
         # chat autoresume
         if os.path.exists(self.current_save_path) and core.config.get("core", {}).get("auto_resume_chats"):

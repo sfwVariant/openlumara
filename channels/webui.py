@@ -12,6 +12,7 @@ import uuid
 import base64
 import secrets
 import time
+import copy
 from datetime import datetime
 from collections import defaultdict
 from typing import List, Set, Dict, Any, Optional
@@ -413,49 +414,35 @@ async def get_messages():
     if not channel_instance:
         return {'messages': [], 'count': 0}
 
-    messages = await channel_instance.context.chat.get() or []
+    messages_orig = await channel_instance.context.chat.get() or []
+    messages = copy.deepcopy(messages_orig)
+
     current_id = await channel_instance.context.chat.get_id()
 
-    result = []
     for i, msg in enumerate(messages):
-        msg_data = {
-            'role': msg.get('role', 'user'),
-            'content': msg.get('content', ''),
-            'tool_calls': msg.get('tool_calls'),
-            'tool_call_id': msg.get('tool_call_id'),
-            'reasoning_content': msg.get('reasoning_content'),
-            'segments': msg.get('segments', []),
-            'index': i
-        }
-        result.append(msg_data)
+        msg['index'] = i
 
-    return {'messages': result, 'count': len(result), 'current_chat_id': current_id}
+    return {'messages': messages, 'count': len(messages), 'current_chat_id': current_id}
 
 @app.get("/messages/since")
 async def get_messages_since(index: int = 0):
     if not channel_instance:
         return {'messages': [], 'count': 0}
 
-    messages = await channel_instance.context.chat.get() or []
+    messages_orig = await channel_instance.context.chat.get() or []
+    messages = copy.deepcopy(messages_orig)
+
     current_id = await channel_instance.context.chat.get_id()
     current_title = await channel_instance.context.chat.get_title()
     current_tags = await channel_instance.context.chat.get_tags() or []
 
-    result = []
-    for i in range(index, len(messages)):
-        msg = messages[i]
-        msg_data = {
-            'role': msg.get('role', 'user'),
-            'content': msg.get('content', ''),
-            'tool_calls': msg.get('tool_calls'),
-            'tool_call_id': msg.get('tool_call_id'),
-            'reasoning_content': msg.get('reasoning_content'),
-            'index': i
-        }
-        result.append(msg_data)
+    for i, msg in enumerate(messages):
+        msg['index'] = i
+
+    messages_slice = messages[index:]
 
     return {
-        'messages': result, 'count': len(result), 'total': len(messages),
+        'messages': messages_slice, 'count': len(messages_slice), 'total': len(messages_slice),
         'current_chat_id': current_id, 'current_chat_title': current_title,
         'current_chat_tags': current_tags
     }
@@ -672,25 +659,22 @@ async def load_chat(id: str):
     if not success:
         raise HTTPException(status_code=404, detail="Chat not found")
 
-    messages = await channel_instance.context.chat.get() or []
+    messages_orig = await channel_instance.context.chat.get() or []
+    messages = copy.deepcopy(messages_orig)
+
     title = await channel_instance.context.chat.get_title()
     loaded_id = await channel_instance.context.chat.get_id()
     category = await channel_instance.context.chat.get_category()
     tags = await channel_instance.context.chat.get_tags() or []
     custom_data = await channel_instance.context.chat.get_data()
 
-    result = []
     for i, msg in enumerate(messages):
-        result.append({
-            'role': msg.get('role', 'user'), 'content': msg.get('content', ''),
-            'tool_calls': msg.get('tool_calls'), 'tool_call_id': msg.get('tool_call_id'),
-            'reasoning_content': msg.get('reasoning_content'), 'index': i
-        })
+        msg['index'] = i
 
     return {
         'success': True, 'chat': {
             'id': loaded_id, 'title': title, "category": category, 'tags': tags,
-            'custom_data': custom_data, 'messages': result, 'total': len(result)
+            'custom_data': custom_data, 'messages': messages, 'total': len(messages)
         }
     }
 
@@ -704,24 +688,21 @@ async def get_current_chat():
     if conv_id is None:
         return {'success': True, 'current_id': None, 'chat': None}
 
-    messages = await chat.get() or []
+    messages_orig = await channel_instance.context.chat.get() or []
+    messages = copy.deepcopy(messages_orig)
+
     title = await chat.get_title()
     tags = await chat.get_tags() or []
     category = await chat.get_category()
     custom_data = await chat.get_data()
 
-    result = []
     for i, msg in enumerate(messages):
-        result.append({
-            'role': msg.get('role', 'user'), 'content': msg.get('content', ''),
-            'tool_calls': msg.get('tool_calls'), 'tool_call_id': msg.get('tool_call_id'),
-            'reasoning_content': msg.get('reasoning_content'), 'index': i
-        })
+        msg['index'] = i
 
     return {
         'success': True, 'chat': {
             'id': conv_id, 'title': title or 'New chat', 'category': category or 'general',
-            'tags': tags, 'custom_data': custom_data, 'messages': result, 'total': len(result)
+            'tags': tags, 'custom_data': custom_data, 'messages': messages, 'total': len(messages)
         }
     }
 
@@ -1272,10 +1253,8 @@ class Webui(core.channel.Channel):
         "password": "admin"
     }
 
-    async def run(self):
-        """Start the FastAPI web server."""
-        global channel_instance
-        channel_instance = self
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         network_mode = self.config.get("network_mode")
         match network_mode:
@@ -1290,6 +1269,11 @@ class Webui(core.channel.Channel):
 
         self.port = self.config.get("port")
         self.url = f"http://{self.host}:{self.port}"
+
+    async def run(self):
+        """Start the FastAPI web server."""
+        global channel_instance
+        channel_instance = self
 
         core.log("webui", f"Starting WebUI on {self.url}")
 

@@ -137,7 +137,7 @@ class APIClient():
         """returns the last connection error message"""
         return self._connection_error
 
-    async def _request(self, context, tools=None, stream=False):
+    async def _request(self, context, tools=None, stream=False, use_thinking=True):
         """send a request to the LLM and return the response object"""
 
         if not context:
@@ -163,7 +163,7 @@ class APIClient():
             "max_completion_tokens": core.config.get("api", {}).get("max_output_tokens", 8192),
             "extra_body": {
                 "chat_template_kwargs": {
-                    "enable_thinking": core.config.get("model", "enable_thinking")
+                    "enable_thinking": core.config.get("model", "enable_thinking", default=use_thinking)
                 }
             }
         }
@@ -242,7 +242,7 @@ class APIClient():
 
         return response
 
-    async def send(self, context: list, system_prompt=True, use_tools=True, tools=None, **kwargs):
+    async def send(self, context: list, system_prompt=True, use_tools=True, tools=None, use_thinking=True, **kwargs):
         """send a message to the LLM. returns a string or error dict"""
 
         self.cancel_request = False
@@ -251,7 +251,7 @@ class APIClient():
         if not tools:
             tools = self.manager.tools
 
-        response = await self._request(context, tools=(tools if use_tools else None))
+        response = await self._request(context, tools=(tools if use_tools else None), use_thinking=use_thinking)
 
         # return errors if applicable
         if isinstance(response, dict) and "error" in response:
@@ -264,7 +264,7 @@ class APIClient():
             core.log_error("error while processing response from AI", e)
             return {"error": "processing_failed", "message": str(e)}
 
-    async def send_stream(self, context: list, use_tools=True, tools=None):
+    async def send_stream(self, context: list, use_tools=True, tools=None, use_thinking=True):
         """send a message to the LLM. is an iterable async generator"""
 
         self.cancel_request = False
@@ -273,7 +273,7 @@ class APIClient():
         if not tools:
             tools = self.manager.tools
 
-        response = await self._request(context, tools=(tools if use_tools else None), stream=True)
+        response = await self._request(context, tools=(tools if use_tools else None), stream=True, use_thinking=use_thinking)
 
         # return errors if applicable
         if isinstance(response, dict) and "error" in response:

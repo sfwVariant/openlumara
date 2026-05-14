@@ -194,6 +194,7 @@ function renderAssistantMessageParts(msg, toolResponseMap) {
  */
 function renderSingleMessage(msg, index, animate) {
     const role = msg.role || 'user';
+    const signal = msg.signal || false;
     const rawContent = msg.content || '';
     const reasoningContent = msg.reasoning_content || null;
     const toolCalls = msg.tool_calls || null;
@@ -205,7 +206,15 @@ function renderSingleMessage(msg, index, animate) {
 
     let wrapperClass, msgClass;
 
-    if (parsed.isAnnouncement) {
+    console.log(signal);
+    console.log(msg);
+
+    if (signal) {
+        if (signal === "SUMMARIZATION_CUTOFF") {
+            wrapperClass = "signal";
+            msgClass = "summarization_cutoff";
+        }
+    } else if (parsed.isAnnouncement) {
         wrapperClass = 'announce';
         msgClass = `announce ${parsed.type}`;
     } else if (parsed.isCommandOutput) {

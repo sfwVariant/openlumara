@@ -25,7 +25,7 @@ OpenLumara distinguishes between two main types of commands:
 ## Key Features
 
 ### Hierarchical Configuration (`/config`)
-The `/config` command allows users to modify settings at runtime. It supports nested paths (e.g., `/config set api url http://localhost:5001/v1`), which are then automatically persisted to the `config.yml` file.
+The `/config` command allows users to modify settings at runtime. It supports nested paths (e.g., `/config api url http://localhost:5001/v1`), which are then automatically persisted to the `config.yml` file.
 
 ### Dynamic Module Help
 The `/help` command is context-aware. It doesn't just show a list of built-in commands; it also queries all loaded modules to display their custom registered commands, grouped by module.
