@@ -31,6 +31,10 @@ class Channel(core.module.Module):
             - Press gear icon to open settings
             - Press icon with arrow down to export chat history
             - Press trashcan icon to clear chat
+        - Chat list (hidden behind swipe gesture on mobile, always visible on the left on desktop)
+            - Type into search box to search chats within current category
+            - Press page icon to search within full content instead of just name
+            - Press tag icon to filter by tags
         - Ask AI to rename, tag, or categorize chat (if `chats` module enabled) to auto-sort a chat
 
         Desktop exclusive:
@@ -40,15 +44,16 @@ class Channel(core.module.Module):
             - Press Ctrl+Space for Global Search (searches across all chats)
         - Sidebar:
             - Can be hidden using Ctrl+B
-            - Right side (chat list)
-                - Type into search box to search chats within current category
-                - Press page icon to search within full content instead of just name
-                - Press tag icon to filter by tags
-            - Left side (category list)
-                - Click category to switch to it
-                - Ask AI to sort chat into a new category to create a new category
-                - Drag and drop a chat from the chat list onto a category to sort it
+            - Split into two columns:
+                - Right side (chat list)
+                - Left side (category list)
+                    - Click category to switch to it
+                    - Ask AI to sort chat into a new category to create a new category
+                    - Drag and drop a chat from the chat list onto a category to sort it
             - Border between chat list and category list can be clicked to show/hide category list
+        - Input bar (at bottom):
+            - Press Ctrl+Up and Ctrl+Down to navigate input history
+            - You can paste media like photos and screenshots into the input field
 
         Mobile exclusive:
         - Swipe from left to open menu that contains all previous chats. Tap a chat to switch to it. Tap menu's header to see chat category list.
