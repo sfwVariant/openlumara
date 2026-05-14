@@ -200,6 +200,7 @@ function renderSingleMessage(msg, index, animate) {
     const toolCalls = msg.tool_calls || null;
     const toolCallId = msg.tool_call_id || null;
     const rawText = extractTextContent(rawContent);
+    const rawTextWithoutMultimodal = extractTextContent(rawContent, false);
     const parsed = parseMessageContent(rawContent);
 
     if (rawText === '[SYSTEM_TICK]' || rawText.startsWith('[AUTOMATED SYSTEM INSTRUCTION]')) return;
@@ -284,7 +285,7 @@ function renderSingleMessage(msg, index, animate) {
     wrapper.appendChild(msgDiv);
 
     if ((role === 'user' || role === 'assistant') && !(toolCalls && toolCalls.length > 0)) {
-        const actions = createActionButtons(role, index, rawText);
+        const actions = createActionButtons(role, index, rawTextWithoutMultimodal);
         wrapper.appendChild(actions);
     }
 

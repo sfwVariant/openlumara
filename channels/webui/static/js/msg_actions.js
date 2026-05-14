@@ -90,6 +90,9 @@ async function saveEdit(index, newContent) {
     }
 
     editingIndex = null;
+
+    // auto-regenerate from this point
+    await regenerateMessage(index);
 }
 
 async function cancelEdit() {
