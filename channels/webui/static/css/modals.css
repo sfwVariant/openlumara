@@ -180,3 +180,7 @@
     width: 30%;
     height: 350px;
 }
+
+#shortcuts-modal {
+    width: 50%;
+}
