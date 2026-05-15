@@ -254,10 +254,14 @@ class Commands:
         cmd_prefix = core.config.get("core").get("cmd_prefix", "/")
         cmd_prefix_index = message_content.lower().find(cmd_prefix.lower())+len(cmd_prefix)
 
-        cmd = shlex.split(message_content[cmd_prefix_index:])
-        args = cmd[1:]
-
-        return (cmd_prefix, cmd, args)
+        try:
+            cmd = shlex.split(message_content[cmd_prefix_index:])
+            args = cmd[1:]
+            return (cmd_prefix, cmd, args)
+        except ValueError as e:
+            # Handle malformed shell syntax gracefully
+            core.log_error("Command parsing error", e)
+            return None, None, []
 
     async def process_input(self, message: dict):
         """wrapper around the real _process_input, handles insertion of context"""

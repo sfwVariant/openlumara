@@ -5,6 +5,12 @@ debug = False
 
 from core.functions import *
 import core.exceptions
+
+# wtf tiktoken?! apparentely you don't work offline... might need to switch off it ASAP
+cache_dir = core.get_path(".tiktoken_cache")
+os.makedirs(cache_dir, exist_ok=True)
+os.environ["TIKTOKEN_CACHE_DIR"] = cache_dir
+
 import core.config
 import core.storage
 import core.module

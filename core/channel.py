@@ -15,13 +15,6 @@ class Channel:
         # base settings here lol
     }
 
-    # Persistent state for the tool renderer
-    _tool_state = {
-        "name": None,
-        "raw_args": "",
-        "keys_state": {}
-    }
-
     def __init__(self, manager):
         self.manager = manager
         self.name = core.modules.get_name(self) # shorthand alias
@@ -40,6 +33,13 @@ class Channel:
         # the user first sending a message. this is what powers announcements and the like
         self.push_queue = asyncio.Queue()
         self._queue_task = None
+
+        # Persistent state for the tool renderer
+        self._tool_state = {
+            "name": None,
+            "raw_args": "",
+            "keys_state": {}
+        }
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)

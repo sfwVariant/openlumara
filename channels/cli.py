@@ -73,6 +73,13 @@ class Cli(core.channel.Channel):
 
     running = True
 
+    settings =  {
+        "show_reasoning": {
+            "description": "Whether to show the model's internal reasoning process within sent messages. Works in both streaming mode and non-streaming mode",
+            "default": False
+        }
+    }
+
     def _setup_style(self):
         self.style = prompt_toolkit.styles.Style.from_dict({
             "prompt": "ansicyan bold",
