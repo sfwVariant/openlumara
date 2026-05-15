@@ -370,7 +370,9 @@ def get_schema(*args, **kwargs):
         section = schema.setdefault(section_key, {})
         settings = section.setdefault("settings", {})
         for name, data in section_cache.items():
-            settings[name] = data["schema"]
+            # Flatten the settings here so the schema only contains values.
+            # This prevents metadata (description, default) from leaking into the config file.
+            settings[name] = _flatten_settings(data["schema"])
 
     return schema
 
@@ -617,5 +619,3 @@ def get(*args, **kwargs):
         else:
             return default
     return value
-
-
