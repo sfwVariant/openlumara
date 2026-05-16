@@ -1394,20 +1394,17 @@
     width: 100%;
 }
 
-.prompt-processing-text {
+.prompt-processing-percent {
     font-weight: 600;
     font-size: 14px;
     color: inherit;
-    letter-spacing: 1px;
     line-height: 1.4;
-    text-transform: uppercase;
 }
 
-.prompt-processing-text:last-child {
+.prompt-processing-eta {
     font-size: 11px;
     font-weight: 400;
     opacity: 0.6;
-    letter-spacing: 0.5px;
     margin-top: 2px;
 }
 

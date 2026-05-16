@@ -318,7 +318,8 @@ async function send(providedContent = null) {
     let playedCompletionSound = false;
 
     let progressBarFill = null;
-    let progressTextEls = null;
+    let progressTextPercent = null;
+    let progressTextETA = null;
 
     scrollToBottom();
 
@@ -384,8 +385,8 @@ async function send(providedContent = null) {
                                     fancyProcessingIndicator.innerHTML = `
                                     <div class="prompt-processing-indicator">
                                     <div class="progress-header">
-                                    <span class="prompt-processing-text">Processing: 0%</span>
-                                    <span class="prompt-processing-text" style="opacity: 0.7">(ETA: 0s)</span>
+                                    <span class="prompt-processing-percent">0%</span>
+                                    <span class="prompt-processing-eta" style="opacity: 0.7">(ETA: 0s)</span>
                                     </div>
                                     <div class="prompt-progress-bar">
                                     <div class="prompt-progress-bar-fill" style="width: 0%"></div>
@@ -395,7 +396,8 @@ async function send(providedContent = null) {
 
                                     // 🟢 CACHE DOM REFERENCES
                                     progressBarFill = fancyProcessingIndicator.querySelector('.prompt-progress-bar-fill');
-                                    progressTextEls = fancyProcessingIndicator.querySelectorAll('.prompt-processing-text');
+                                    progressTextPercent = fancyProcessingIndicator.querySelector('.prompt-processing-percent');
+                                    progressTextETA = fancyProcessingIndicator.querySelector('.prompt-processing-eta');
                                 }
                             }
 
@@ -411,9 +413,9 @@ async function send(providedContent = null) {
                             if (progressBarFill) {
                                 progressBarFill.style.width = `${percent}%`;
                             }
-                            if (progressTextEls && progressTextEls.length >= 2) {
-                                progressTextEls[0].textContent = `Processing: ${percent}%`;
-                                progressTextEls[1].textContent = `(ETA: ${Math.ceil(remaining)}s)`;
+                            if (progressTextPercent && progressTextETA) {
+                                progressTextPercent.textContent = `${percent}%`;
+                                progressTextETA.textContent = `(ETA: ${Math.ceil(remaining)}s)`;
                             }
                         }
 
