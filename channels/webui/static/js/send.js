@@ -9,6 +9,7 @@ let streamingToolCalls = {};
 let toolCallsContainer = null;
 let placeholderUserWrapper = null;
 let manuallyCollapsedReasoning = new Set();
+let toolProcessingIndicatorElement = null;
 
 function resetStreamState() {
     streamSegments = [];
@@ -398,6 +399,8 @@ async function send(providedContent = null) {
                                     progressBarFill = fancyProcessingIndicator.querySelector('.prompt-progress-bar-fill');
                                     progressTextPercent = fancyProcessingIndicator.querySelector('.prompt-processing-percent');
                                     progressTextETA = fancyProcessingIndicator.querySelector('.prompt-processing-eta');
+
+                                    scrollToBottom();
                                 }
                             }
 
@@ -408,6 +411,13 @@ async function send(providedContent = null) {
                             const percent = total > 0 ? Math.round((processed / total) * 100) : 0;
                             const elapsed = prog.time_ms / 1000;
                             const remaining = (total - processed) > 0 ? (elapsed / processed) * (total - processed) : 0;
+
+                            // 🟢 NEW: Update Tool Processing Indicator if it exists
+                            if (toolProcessingIndicatorElement && toolProcessingIndicatorElement.updateProgress) {
+                                toolProcessingIndicatorElement.updateProgress(percent);
+                                // Don't return here, as prompt_progress might also be needed for other things,
+                                // or if the backend sends it for the main response too.
+                            }
 
                             // 🟢 UPDATE CACHED ELEMENTS DIRECTLY (no innerHTML!)
                             if (progressBarFill) {
@@ -1757,6 +1767,7 @@ function handleToolResponse(data, aiMsgDiv) {
 
 /**
  * Add a "processing result..." indicator below a tool call card.
+ * Progress bar and percentage are hidden by default.
  */
 function addProcessingIndicator(cardEl) {
     // Remove any existing processing indicator from the container first
@@ -1767,14 +1778,32 @@ function addProcessingIndicator(cardEl) {
 
     const indicator = document.createElement('div');
     indicator.className = 'tool-processing-indicator';
+
+    // 🟢 NEW: Progress bar and percent span are initially hidden via inline styles
     indicator.innerHTML = `
     <div class="tool-processing-content">
     <svg class="tool-processing-spinner" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
     <path d="M21 12a9 9 0 11-6.219-8.56"/>
     </svg>
-    <span class="tool-processing-text">processing result...</span>
+    <span class="tool-processing-text">processing result... <span class="tool-processing-percent" style="display: none;">0%</span></span>
+    <div class="tool-progress-bar" style="display: none;">
+    <div class="tool-progress-bar-fill"></div>
     </div>
     `;
+
+    // 🟢 NEW: Cache references for fast updates later
+    toolProcessingIndicatorElement = indicator;
+    const progressBar = indicator.querySelector('.tool-progress-bar');
+    const progressBarFill = indicator.querySelector('.tool-progress-bar-fill');
+    const percentText = indicator.querySelector('.tool-processing-percent');
+
+    // Helper function to update progress (called from token handler)
+    indicator.updateProgress = function(percent) {
+        progressBar.style.display = 'block'; // Reveal bar
+        percentText.style.display = 'inline'; // Reveal text
+        progressBarFill.style.width = `${percent}%`;
+        percentText.textContent = `${percent}%`;
+    };
 
     // Always append to the very end of the tool calls container
     if (toolCallsContainer) {
