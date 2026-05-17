@@ -2760,7 +2760,7 @@ function createThemeSection() {
 
     const sendSoundInput = createSoundInput(
         'send_message',
-        'Send Message Sound',
+        'Message sent',
         sendIcon
     );
     soundContainer.appendChild(sendSoundInput);
@@ -2769,21 +2769,21 @@ function createThemeSection() {
 
     const responseSoundInput = createSoundInput(
         'response_start',
-        'Response Start Sound',
+        'Message received',
         responseIcon
     );
     soundContainer.appendChild(responseSoundInput);
 
     const tokenSoundInput = createSoundInput(
         'token',
-        'Token Generation Sound',
+        'Token generation',
         typewriterIcon
     );
     soundContainer.appendChild(tokenSoundInput);
 
     const twSoundInput = createSoundInput(
         'typing',
-        'Typewriter Sound',
+        'Typewriter',
         typewriterIcon
     );
     soundContainer.appendChild(twSoundInput);
@@ -2792,14 +2792,14 @@ function createThemeSection() {
 
     const reasoningSoundInput = createSoundInput(
         'reasoning_end',
-        'Thinking Done Sound',
+        'Done thinking',
         reasoningIcon
     );
     soundContainer.appendChild(reasoningSoundInput);
 
     const compSoundInput = createSoundInput(
         'completion',
-        'Completion Sound',
+        'Response finished',
         completionIcon
     );
 
