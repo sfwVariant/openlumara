@@ -314,7 +314,7 @@ class Scheduler(core.module.Module):
                 final_messages = private_messages if self.config.get("prompt_strategy") == "send full context" else [instruction_message]
 
                 response = await self.manager.API.send(
-                    private_messages,
+                    final_messages,
                     use_tools=True,
                     tools=tools
                 )
