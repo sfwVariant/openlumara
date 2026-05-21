@@ -309,6 +309,7 @@ class Scheduler(core.module.Module):
         max_delay = 300  # 5 minutes cap
         response = None
 
+        attempt = 0
         while True:
             try:
                 # Build a fresh private copy each attempt (context may have changed)
@@ -328,16 +329,15 @@ class Scheduler(core.module.Module):
                     break  # Success
 
                 # response is None/empty — treat as transient failure
-                core.log("scheduler", f"job {job_id}: empty response on attempt {attempt + 1}/{max_retries}")
+                core.log("scheduler", f"job {job_id}: attempt failed: empty response")
 
             except Exception as e:
-                core.log("scheduler", f"job {job_id}: attempt {attempt + 1}/{max_retries} failed: {e}")
+                core.log("scheduler", f"job {job_id}: attempt failed: {e}")
 
-            # Don't sleep after the last attempt
-            if attempt < max_retries - 1:
-                delay = min(base_delay * (2 ** attempt), max_delay)
-                core.log("scheduler", f"job {job_id}: retrying in {delay}s")
-                await asyncio.sleep(delay)
+            delay = min(base_delay * (2 ** attempt), max_delay)
+            core.log("scheduler", f"job {job_id}: retrying in {delay}s")
+            await asyncio.sleep(delay)
+            attempt += 1
 
         # Process response
         final_content = response.get("content", "")
