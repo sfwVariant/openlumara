@@ -149,9 +149,6 @@ class Calendar(core.module.Module):
         return "\n".join(output)
 
     async def add_event(self, title: str, year: int, month: int, day: int, hour: int, minute: int, should_notify: bool = True, notify_channel: str = None):
-        if not notify_channel and self.channel:
-            notify_channel = self.channel.name
-
         event = {
             "id": str(ulid.ULID()),
             "title": title,
@@ -165,7 +162,7 @@ class Calendar(core.module.Module):
                 )
             ),
             "notify": should_notify,
-            "notify_channel": notify_channel
+            "notify_channel": notify_channel or self.config.get("notification_channel")
         }
 
         self.events.append(event)
