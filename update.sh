@@ -22,6 +22,11 @@ else
     echo "warning: git fetch failed. skipping update check."
 fi
 
+if [ ! -d "venv" ]; then
+    echo "setting up virtual environment with $PYTHON_BIN..."
+    $PYTHON_BIN -m venv venv
+fi
+
 echo "ensuring dependencies are up to date..."
 source venv/bin/activate
 pip install -q --upgrade pip

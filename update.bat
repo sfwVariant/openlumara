@@ -30,14 +30,15 @@ if %errorlevel% equ 0 (
     echo warning: git fetch failed. skipping update check.
 )
 
+if not exist "venv" (
+    echo setting up virtual environment with %PYTHON_BIN%...
+    %PYTHON_BIN% -m venv venv
+)
+
 :: 2. Ensure dependencies are up to date
 echo ensuring dependencies are up to date...
-if exist "venv" (
-    venv\Scripts\python -m pip install -q --upgrade pip
-    venv\Scripts\python -m pip install -r requirements.txt
-) else (
-    echo error: venv folder not found. please run run.bat first.
-)
+venv\Scripts\python -m pip install -q --upgrade pip
+venv\Scripts\python -m pip install -r requirements.txt
 
 echo.
 echo done!

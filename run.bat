@@ -19,9 +19,10 @@ if not exist "venv" (
     echo setting up virtual environment with %PYTHON_BIN%...
     %PYTHON_BIN% -m venv venv
 
-    :: since this is the first run, update openlumara and install all requirements
-    echo first run detected, triggering auto-update...
-    call update.bat
+    :: since this is the first run, install all requirements
+    echo installing requirements...
+    venv\Scripts\python -m pip install -q --upgrade pip
+    venv\Scripts\python -m pip install -r requirements.txt
 )
 
 :: 3. Run the app
