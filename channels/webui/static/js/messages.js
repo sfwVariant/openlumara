@@ -846,27 +846,23 @@ function createActionButtons(role, index, content, disabled = false) {
     };
     actions.appendChild(copyBtn);
 
-    if (role === 'user' || role === 'assistant') {
-        const editBtn = document.createElement('button');
-        editBtn.className = 'message-action-btn';
-        editBtn.innerHTML = ICONS.edit;
-        editBtn.setAttribute('aria-label', 'Edit message');
-        editBtn.setAttribute('title', 'Edit');
-        editBtn.disabled = disabled;
-        editBtn.onclick = () => editMessage(index, content);
-        actions.appendChild(editBtn);
-    }
+    const editBtn = document.createElement('button');
+    editBtn.className = 'message-action-btn';
+    editBtn.innerHTML = ICONS.edit;
+    editBtn.setAttribute('aria-label', 'Edit message');
+    editBtn.setAttribute('title', 'Edit');
+    editBtn.disabled = disabled;
+    editBtn.onclick = () => editMessage(index, content);
+    actions.appendChild(editBtn);
 
-    if (role === 'assistant') {
-        const regenBtn = document.createElement('button');
-        regenBtn.className = 'message-action-btn regenerate';
-        regenBtn.innerHTML = ICONS.regenerate;
-        regenBtn.setAttribute('aria-label', 'Regenerate response');
-        regenBtn.setAttribute('title', 'Regenerate');
-        regenBtn.disabled = disabled;
-        regenBtn.onclick = () => regenerateMessage(index);
-        actions.appendChild(regenBtn);
-    }
+    const regenBtn = document.createElement('button');
+    regenBtn.className = 'message-action-btn regenerate';
+    regenBtn.innerHTML = ICONS.regenerate;
+    regenBtn.setAttribute('aria-label', 'Regenerate response');
+    regenBtn.setAttribute('title', 'Regenerate');
+    regenBtn.disabled = disabled;
+    regenBtn.onclick = () => regenerateMessage(index);
+    actions.appendChild(regenBtn);
 
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'message-action-btn delete';
