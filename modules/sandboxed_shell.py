@@ -38,7 +38,11 @@ class SandboxedShell(core.module.Module):
             "default": 30,
             "description": "Maximum amount of time a process inside the shell is allowed to run for"
         },
-        "image": "python:3.11-slim"
+        "image": "python:3.11-slim",
+        "run_as_user": {
+            "default": "65534",
+            "description": "UID to run the container processes as. Defaults to 65534 (nobody) for security."
+        }
     }
 
     def __init__(self, *args, **kwargs):
@@ -80,6 +84,7 @@ class SandboxedShell(core.module.Module):
             start_cmd = [
                 self.runtime, 'run', '-d',
                 '--name', self.container_name,
+                '--user', self.config.get("run_as_user", default="65534"),
                 '--cpus', str(self.config.get("cpu_limit", default=0.5)),
                 '--memory', self.config.get("memory_limit", default="256m"),
                 '--pids-limit', str(self.config.get("max_processes", default=50)),
