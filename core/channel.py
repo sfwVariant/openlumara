@@ -200,11 +200,9 @@ class Channel:
             if is_cmd and message.get("role", "user") == "user":
                 try:
                     cmd_response = await self.commands.process_input(message, authorized=commands_authorized)
-                except core.exceptions.UnauthorizedException as e:
-                    return {"role": "assistant", "content": str(e)}
                 except Exception as e:
-                    # let all other errors pass gracefully
                     core.log_error("error while executing command", e)
+                    return {"role": "assistant", "content": str(e)}
 
                 if cmd_response:
                     return {"role": "assistant", "content": cmd_response}
@@ -318,11 +316,10 @@ class Channel:
             if is_cmd and message.get("role", "user") == "user":
                 try:
                     cmd_response = await self.commands.process_input(user_message, authorized=commands_authorized)
-                except core.exceptions.UnauthorizedException as e:
-                    yield {"type": "content", "content": str(e)}
                 except Exception as e:
-                    # let all other exceptions pass gracefully
                     core.log_error("error while executing command", e)
+                    yield {"type": "content", "content": str(e)}
+                    return
 
                 if cmd_response:
                     # insert and return the command response without sending it to the AI

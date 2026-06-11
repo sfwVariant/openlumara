@@ -274,6 +274,9 @@ class Commands:
         content = self.channel._extract_content(message)
         cmd_prefix, cmd, args = await self._extract_cmd(content)
 
+        if cmd_prefix is None or cmd is None:
+            return False
+
         if len(cmd) <= 0:
             raise core.exceptions.UnauthorizedException("Command was somehow zero length. Aborting for security reasons.")
 
