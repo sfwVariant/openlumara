@@ -127,8 +127,8 @@ class Client(discord.Client):
                             content = content.replace("<@>", "")
                             content = content.strip()
 
-                        cmd_prefix, cmd, args = await self.ai_channel.commands._extract_cmd(content_str)
-                        is_cmd = content_str.lower().strip().startswith(cmd_prefix.lower())
+                        cmd_prefix, cmd, args = await self.ai_channel.commands._extract_cmd(content)
+                        is_cmd = content.lower().strip().startswith(cmd_prefix.lower())
 
                         if is_cmd:
                             # send the pure command to the AI
