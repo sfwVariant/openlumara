@@ -117,7 +117,7 @@ class SandboxedShell(core.module.Module):
                 "exit_code": process.returncode,
                 "data_dir": "/data"
             })
-        except subprocess.TimeoutExpired:
+        except:
             # Timeout occurred
             process.kill()  # Kill the docker run process
             try:
