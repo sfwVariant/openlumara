@@ -96,7 +96,8 @@ class SandboxedShell(core.module.Module):
         self.container_name = self._get_unique_name()
 
         # Build container run command with strict security settings
-        cmd = [self.runtime, 'run', '--rm']
+        # Use detached mode for better lifecycle control instead of --rm
+        cmd = [self.runtime, 'run', '-d']
         
         # Use gvisor runtime if available
         if self.use_gvisor:
@@ -129,43 +130,53 @@ class SandboxedShell(core.module.Module):
         cmd.extend(['-w', '/data'])
         cmd.extend([img, 'sh', '-c', command])
 
-
+        process = None
         try:
-            # Run the container with manual timeout handling
+            # Start the container in detached mode
             process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout, stderr = process.communicate(timeout=5)  # Quick timeout for container start
+            
+            if process.returncode != 0:
+                return self.result(f"Failed to start container: {stderr.decode().strip()}", False)
 
-            stdout, stderr = process.communicate(timeout=timeout)
-            result = self.result({
-                "stdout": stdout.decode().strip(),
-                "stderr": stderr.decode().strip(),
-                "exit_code": process.returncode,
+            # Wait for container to finish with proper timeout
+            wait_process = subprocess.Popen(
+                [self.runtime, 'wait', self.container_name],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            )
+            
+            try:
+                wait_process.communicate(timeout=timeout)
+            except subprocess.TimeoutExpired:
+                # Kill the container first, then kill the wait process
+                subprocess.run([self.runtime, 'kill', self.container_name], capture_output=True, timeout=5)
+                wait_process.kill()
+                wait_process.communicate()  # Clean up the process
+                return self.result(f"Command timed out after {timeout}s", False)
+
+            # Get container logs
+            log_process = subprocess.run(
+                [self.runtime, 'logs', self.container_name],
+                capture_output=True, timeout=5
+            )
+            
+            return self.result({
+                "stdout": log_process.stdout.decode().strip(),
+                "stderr": log_process.stderr.decode().strip(),
+                "exit_code": wait_process.returncode,
                 "data_dir": "/data"
             })
+
         except subprocess.TimeoutExpired:
-            # Timeout occurred
-            process.kill()  # Kill the docker run process
-            result = self.result(f"Command timed out after {timeout}s", False)
+            return self.result(f"Command timed out after {timeout}s", False)
+        except Exception as e:
+            return self.result(f"Error running command: {e}", False)
         finally:
-            try:
-                # Only kill if the process is still running
-                if process.returncode is None:
-                    process.kill()
-            except Exception:
-                pass  # Process is already dead or killed
-
-            try:
-                # Explicitly kill the container
-                subprocess.run([self.runtime, 'kill', self.container_name], capture_output=True, timeout=5)
-            except Exception:
-                pass
-
-            # Clean up the container
+            # Always clean up the container
             try:
                 subprocess.run([self.runtime, 'rm', '-f', self.container_name], capture_output=True, timeout=5)
             except Exception:
-                pass
-
-        return result
+                pass  # Container cleanup failed, but don't fail the whole operation
 
     @core.module.command("shell", send_to_ai=True, help={
         "<cmd>": "runs a command in the sandboxed shell"
