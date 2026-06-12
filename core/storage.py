@@ -193,7 +193,7 @@ class StorageDict(dict):
             return False
 
     def _parse_nested_keys(self, flat_dict):
-        """Convert flat keys like 'ideas/opticlaw/topic' into nested dict structure."""
+        """Convert flat keys like 'ideas/openlumara/topic' into nested dict structure."""
         result = {}
         for key, value in flat_dict.items():
             # normalize separators to / to handle Windows-style paths
@@ -207,7 +207,7 @@ class StorageDict(dict):
         return result
 
     def _flatten_nested_keys(self, nested_dict, prefix=""):
-        """Convert nested dict into flat keys like 'ideas/opticlaw/topic'."""
+        """Convert nested dict into flat keys like 'ideas/openlumara/topic'."""
         result = {}
         for key, value in nested_dict.items():
             full_key = f"{prefix}/{key}" if prefix else key
@@ -247,8 +247,10 @@ class StorageDict(dict):
             case "yaml":
                 self._write(yaml.safe_dump(dict(self), default_flow_style=False, sort_keys=False, allow_unicode=True))
             case "markdown":
+                # NOTE to readers: i suck at recursive programming, so this is where i heavily use AI assistance. ~Rose22
+
                 # recursive file structure
-                # keys like "ideas/opticlaw/topic" become nested directories
+                # keys like "ideas/openlumara/topic" become nested directories
                 if not os.path.exists(self.path):
                     os.makedirs(self.path, exist_ok=True)
 
@@ -256,18 +258,15 @@ class StorageDict(dict):
                 flat_items = self._flatten_nested_keys(dict(self))
                 failed_keys = []
 
-                # Iterate over a list of items to avoid "dictionary changed size during iteration" error
                 for key, content in list(flat_items.items()):
                     try:
-                        # Use sandbox_path to safely resolve and validate the target path
                         name = core.sandbox_path(self.path, f"{key}.md")
                     except ValueError as e:
-                        # If validation fails (e.g., path traversal), delete the key
-                        # from the in-memory dictionary to keep it clean.
+                        # if validation fails, delete the key from the in-memory dicts to keep them clean.
                         self._delete_nested_key(key)
-                        # Also remove from flat_items to ensure file cleanup logic works correctly
                         del flat_items[key]
                         failed_keys.append((key, str(e)))
+
                         continue  # Skip saving this file
 
                     file_dir = os.path.dirname(name)
@@ -294,9 +293,7 @@ class StorageDict(dict):
                             path_no_ext = rel_path[:-3]
 
                             # normalize path to make it cross-platform
-                            normalized = os.path.normpath(path_no_ext)
-
-                            # split by the OS-specific separator and join with '/'
+                            normalized = os.path.normpath(path_no_ext)=
                             logical_key = "/".join(normalized.split(os.sep))
 
                             if logical_key not in flat_items:
@@ -337,13 +334,12 @@ class StorageDict(dict):
                         if filename.endswith(".md"):
                             full_path = os.path.join(root, filename)
                             rel_path = os.path.relpath(os.path.join(root, filename), self.path)
+
                             # remove .md extension
                             path_without_ext = rel_path[:-3]
 
-                            # normalize to the current OS (turns '/' to '\' on windows)
+                            # normalize path to make it cross-platform
                             normalized_path = os.path.normpath(path_without_ext)
-
-                            # split by the OS-specific separator and join with '/'
                             key = "/".join(normalized_path.split(os.sep))
 
                             with open(full_path, "r", encoding="utf-8") as f:
