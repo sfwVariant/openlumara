@@ -71,6 +71,14 @@ class SandboxedShell(core.module.Module):
         self.host_workspace = os.path.expanduser(self.config.get("sandbox_path", default="~/sandbox"))
         os.makedirs(self.host_workspace, exist_ok=True)
 
+        # Check for gVisor (runsc) availability
+        if shutil.which("runsc"):
+            self.use_gvisor = True
+            core.log("sandbox_shell", "gVisor (runsc) detected. Sandbox will use gVisor for enhanced security.")
+        else:
+            self.use_gvisor = False
+            core.log("sandbox_shell", "Warning: gVisor (runsc) not found. Sandbox is running with standard isolation. To install gVisor for better security, see: https://gvisor.dev/docs/user_guide/install/")
+
     def _get_unique_name(self):
         """Generate a unique container name to avoid collisions"""
         return f"ol_{uuid.uuid4().hex[:8]}_{int(time.time()*1000)}"
@@ -88,8 +96,15 @@ class SandboxedShell(core.module.Module):
         self.container_name = self._get_unique_name()
 
         # Build container run command with strict security settings
-        cmd = [
-            self.runtime, 'run', '--rm',
+        cmd = [self.runtime, 'run', '--rm']
+        
+        # Use gvisor runtime if available
+        if self.use_gvisor:
+            cmd.extend(['--runtime', 'runsc'])
+            if self.runtime == "podman":
+                cmd.extend(["--runtime-flag", "ignore-cgroups"])
+            
+        cmd.extend([
             '--name', self.container_name,
             '--user', uid,
             '--tmpfs', '/dev', # Block access to host /dev
@@ -99,7 +114,7 @@ class SandboxedShell(core.module.Module):
             '--pids-limit', str(self.config.get("max_processes", default=10)),
             '--network', 'bridge' if self.config.get("internet_access", default=False) else 'none',
             '--stop-timeout', '1'
-        ]
+        ])
 
         if self.config.get("read_only", default=True):
             cmd.append('--read-only')
