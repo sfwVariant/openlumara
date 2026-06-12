@@ -787,12 +787,36 @@ function renderSettingsForm(categories, activeSettingsCategory = null) {
         section.className = 'settings-section' + (cat === activeSettingsCategory ? ' active' : '');
         section.dataset.category = cat;
 
-        section.innerHTML = `
-        <h3 class="settings-section-title">${data.title}</h3>
-        <p class="settings-section-desc">${data.description}</p>
-        `;
-
         const itemsContainer = document.createElement('div');
+        
+        // Only show main category header if not viewing a module/channel sub-page
+        if (!(activeModule || activeChannel)) {
+            section.innerHTML = `
+            <h3 class="settings-section-title">${data.title}</h3>
+            `;
+        } else {
+            if (isMobile) {
+                // show a back button instead on mobile
+                const backBtn = document.createElement('button');
+                backBtn.className = 'mobile-back-btn';
+                backBtn.style.cssText = 'display: flex; align-items: center; gap: 10px; border: 1px solid var(--border-color); color: var(--text-primary); font-size: 0.95rem; padding: 12px 16px; width: 100%; margin-bottom: 12px; border-radius: var(--radius-sm); transition: all 0.15s ease;';
+                backBtn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5"></path>
+                <path d="M12 19l-7-7 7-7"></path>
+                </svg>
+                <span>Back</span>
+                `;
+                backBtn.onmouseenter = () => { backBtn.style.background = 'var(--bg-secondary)'; backBtn.style.borderColor = 'var(--accent)'; };
+                backBtn.onmouseleave = () => { backBtn.style.background = 'var(--bg-tertiary)'; backBtn.style.borderColor = 'var(--border-color)'; };
+                backBtn.onclick = () => {
+                    activeModule = null;
+                    activeChannel = null;
+                    renderSettingsForm(categories, activeSettingsCategory);
+                };
+                itemsContainer.appendChild(backBtn);
+            }
+        }
         itemsContainer.className = 'settings-items';
 
         // Add theme section for appearance
@@ -819,66 +843,33 @@ function renderSettingsForm(categories, activeSettingsCategory = null) {
                 if (isMobile) {
                     if (activeModule) {
                         // Drill-down: Show settings for selected module
-                        const backBtn = document.createElement('button');
-                        backBtn.className = 'mobile-back-btn';
-                        backBtn.style.cssText = 'display: flex; align-items: center; gap: 10px; background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary); font-size: 0.9rem; font-weight: 600; cursor: pointer; padding: 12px 16px; width: 100%; margin-bottom: 12px; border-radius: 8px; transition: all 0.15s ease;';
-                        backBtn.innerHTML = `
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M19 12H5"></path>
-                        <path d="M12 19l-7-7 7-7"></path>
-                        </svg>
-                        <span>Back</span>
-                        `;
-                        backBtn.onmouseenter = () => { backBtn.style.background = 'var(--bg-secondary)'; backBtn.style.borderColor = 'var(--accent)'; };
-                        backBtn.onmouseleave = () => { backBtn.style.background = 'var(--bg-tertiary)'; backBtn.style.borderColor = 'var(--border-color)'; };
-                        backBtn.onclick = () => {
-                            activeModule = null;
-                            renderSettingsForm(categories, activeSettingsCategory);
-                        };
-                        itemsContainer.appendChild(backBtn);
+
 
                         // Render settings for the active module
                         const moduleSettingsGroupKey = `${cat}.settings.${activeModule}`;
                         const moduleGroup = data.groups?.get(moduleSettingsGroupKey);
                         if (moduleGroup) {
-                            const moduleContainer = document.createElement('div');
-                            moduleContainer.className = 'settings-group';
-                            moduleContainer.dataset.group = moduleSettingsGroupKey;
-
-                            const header = document.createElement('div');
-                            header.className = 'settings-group-header';
-                            header.innerHTML = `<span class="settings-group-title">${formatLabel(activeModule)}</span>`;
-                            
-                            const content = document.createElement('div');
-                            content.className = 'settings-group-content';
+                            const moduleTitle = document.createElement('h3');
+                            moduleTitle.className = 'settings-section-title';
+                            moduleTitle.textContent = formatLabel(activeModule);
+                            itemsContainer.appendChild(moduleTitle);
 
                             moduleGroup.items.forEach(item => {
                                 const itemEl = createSettingItem(item);
-                                content.appendChild(itemEl);
+                                itemsContainer.appendChild(itemEl);
                             });
-
-                            moduleContainer.appendChild(header);
-                            moduleContainer.appendChild(content);
-                            itemsContainer.appendChild(moduleContainer);
                         } else {
                             // Fallback if no specific settings group exists
                             const msg = document.createElement('div');
                             msg.className = 'settings-section-desc';
-                            msg.textContent = `No specific settings configured for ${formatLabel(activeModule)}.`;
+                            msg.textContent = `No settings available for ${formatLabel(activeModule)}.`;
                             itemsContainer.appendChild(msg);
                         }
                     } else {
-                        // Show module list (iOS drill style)
-                        const moduleListContainer = document.createElement('div');
-                        moduleListContainer.className = 'settings-group';
-                        const header = document.createElement('div');
-                        header.className = 'settings-group-header';
-                        header.innerHTML = `<span class="settings-group-title" style="font-weight: 500; color: var(--text-primary);">${data.title}</span>`;
-                        moduleListContainer.appendChild(header);
-                        
+                        // Show module list
                         const listContent = document.createElement('div');
                         listContent.className = 'settings-group-content module-list-content';
-                        listContent.style.cssText = 'display: flex; flex-direction: column; background: transparent; border-radius: 0; overflow: visible; padding: 0; border: none;';
+                        listContent.style.cssText = 'display: flex; flex-direction: column; background: transparent; border-radius: var(--radius-sm); overflow: visible; padding: 0; border: 1px solid var(--border-color); margin-bottom: 14px;';
                         
                         allModules.forEach(moduleName => {
                             if (!enabledSet.has(moduleName)) return;
@@ -896,8 +887,7 @@ function renderSettingsForm(categories, activeSettingsCategory = null) {
                             };
                             listContent.appendChild(btn);
                         });
-                        moduleListContainer.appendChild(listContent);
-                        itemsContainer.appendChild(moduleListContainer);
+                        itemsContainer.appendChild(listContent);
 
                         // Show the global toggle list
                         const itemEl = createSettingItem(directGroup.items[0]);
@@ -910,36 +900,25 @@ function renderSettingsForm(categories, activeSettingsCategory = null) {
                         const moduleSettingsGroupKey = `${cat}.settings.${activeModule}`;
                         const moduleGroup = data.groups?.get(moduleSettingsGroupKey);
                         if (moduleGroup) {
-                            const moduleContainer = document.createElement('div');
-                            moduleContainer.className = 'settings-group';
-                            moduleContainer.dataset.group = moduleSettingsGroupKey;
-
-                            const header = document.createElement('div');
-                            header.className = 'settings-group-header';
-                            header.innerHTML = `<span class="settings-group-title">${formatLabel(activeModule)}</span>`;
-
-                            const content = document.createElement('div');
-                            content.className = 'settings-group-content';
+                            const moduleTitle = document.createElement('h3');
+                            moduleTitle.className = 'settings-section-title';
+                            moduleTitle.textContent = formatLabel(activeModule);
+                            itemsContainer.appendChild(moduleTitle);
 
                             moduleGroup.items.forEach(item => {
                                 const itemEl = createSettingItem(item);
-                                content.appendChild(itemEl);
+                                itemsContainer.appendChild(itemEl);
                             });
-
-                            moduleContainer.appendChild(header);
-                            moduleContainer.appendChild(content);
-                            itemsContainer.appendChild(moduleContainer);
                         } else {
                             // Fallback if no specific settings group exists
                             const msg = document.createElement('div');
                             msg.className = 'settings-section-desc';
-                            msg.textContent = `No specific settings configured for ${formatLabel(activeModule)}.`;
+                            msg.textContent = `No settings available for ${formatLabel(activeModule)}.`;
                             itemsContainer.appendChild(msg);
                         }
                     } else {
-                        // Show the global toggle list (desktop)
+                        // Show the global toggle list
                         const itemEl = createSettingItem(directGroup.items[0]);
-                        itemEl.classList.add('full-width-item');
                         itemsContainer.appendChild(itemEl);
                     }
                 }
@@ -956,63 +935,30 @@ function renderSettingsForm(categories, activeSettingsCategory = null) {
 
                 if (isMobile) {
                     if (activeChannel) {
-                        // Drill-down: Show settings for selected channel
-                        const backBtn = document.createElement('button');
-                        backBtn.className = 'mobile-back-btn';
-                        backBtn.style.cssText = 'display: flex; align-items: center; gap: 10px; background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary); font-size: 0.9rem; font-weight: 600; cursor: pointer; padding: 12px 16px; width: 100%; margin-bottom: 12px; border-radius: 8px; transition: all 0.15s ease;';
-                        backBtn.innerHTML = `
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M19 12H5"></path>
-                        <path d="M12 19l-7-7 7-7"></path>
-                        </svg>
-                        <span>Back</span>
-                        `;
-                        backBtn.onmouseenter = () => { backBtn.style.background = 'var(--bg-secondary)'; backBtn.style.borderColor = 'var(--accent)'; };
-                        backBtn.onmouseleave = () => { backBtn.style.background = 'var(--bg-tertiary)'; backBtn.style.borderColor = 'var(--border-color)'; };
-                        backBtn.onclick = () => {
-                            activeChannel = null;
-                            renderSettingsForm(categories, activeSettingsCategory);
-                        };
-                        itemsContainer.appendChild(backBtn);
-
                         // Render settings for the active channel
                         const channelSettingsGroupKey = `${cat}.settings.${activeChannel}`;
                         const channelGroup = data.groups?.get(channelSettingsGroupKey);
                         if (channelGroup) {
-                            const channelContainer = document.createElement('div');
-                            channelContainer.className = 'settings-group';
-                            channelContainer.dataset.group = channelSettingsGroupKey;
-
-                            const header = document.createElement('div');
-                            header.className = 'settings-group-header';
-                            header.innerHTML = `<span class="settings-group-title">${formatLabel(activeChannel)}</span>`;
-                            
-                            const content = document.createElement('div');
-                            content.className = 'settings-group-content';
+                            const channelTitle = document.createElement('h3');
+                            channelTitle.className = 'settings-section-title';
+                            channelTitle.textContent = formatLabel(activeChannel);
+                            itemsContainer.appendChild(channelTitle);
 
                             channelGroup.items.forEach(item => {
                                 const itemEl = createSettingItem(item);
-                                content.appendChild(itemEl);
+                                itemsContainer.appendChild(itemEl);
                             });
-
-                            channelContainer.appendChild(header);
-                            channelContainer.appendChild(content);
-                            itemsContainer.appendChild(channelContainer);
                         } else {
                             // Fallback if no specific settings group exists
                             const msg = document.createElement('div');
                             msg.className = 'settings-section-desc';
-                            msg.textContent = `No specific settings configured for ${formatLabel(activeChannel)}.`;
+                            msg.textContent = `No settings available for ${formatLabel(activeChannel)}.`;
                             itemsContainer.appendChild(msg);
                         }
                     } else {
                         // Show channel list (iOS drill style)
                         const channelListContainer = document.createElement('div');
                         channelListContainer.className = 'settings-group';
-                        const header = document.createElement('div');
-                        header.className = 'settings-group-header';
-                        header.innerHTML = `<span class="settings-group-title" style="font-weight: 500; color: var(--text-primary);">${data.title}</span>`;
-                        channelListContainer.appendChild(header);
                         
                         const listContent = document.createElement('div');
                         listContent.className = 'settings-group-content module-list-content';
@@ -1048,36 +994,25 @@ function renderSettingsForm(categories, activeSettingsCategory = null) {
                         const channelSettingsGroupKey = `${cat}.settings.${activeChannel}`;
                         const channelGroup = data.groups?.get(channelSettingsGroupKey);
                         if (channelGroup) {
-                            const channelContainer = document.createElement('div');
-                            channelContainer.className = 'settings-group';
-                            channelContainer.dataset.group = channelSettingsGroupKey;
-
-                            const header = document.createElement('div');
-                            header.className = 'settings-group-header';
-                            header.innerHTML = `<span class="settings-group-title">${formatLabel(activeChannel)}</span>`;
-
-                            const content = document.createElement('div');
-                            content.className = 'settings-group-content';
+                            const channelTitle = document.createElement('h3');
+                            channelTitle.className = 'settings-section-title';
+                            channelTitle.textContent = formatLabel(activeChannel);
+                            itemsContainer.appendChild(channelTitle);
 
                             channelGroup.items.forEach(item => {
                                 const itemEl = createSettingItem(item);
-                                content.appendChild(itemEl);
+                                itemsContainer.appendChild(itemEl);
                             });
-
-                            channelContainer.appendChild(header);
-                            channelContainer.appendChild(content);
-                            itemsContainer.appendChild(channelContainer);
                         } else {
                             // Fallback if no specific settings group exists
                             const msg = document.createElement('div');
                             msg.className = 'settings-section-desc';
-                            msg.textContent = `No specific settings configured for ${formatLabel(activeChannel)}.`;
+                            msg.textContent = `No settings available for ${formatLabel(activeChannel)}.`;
                             itemsContainer.appendChild(msg);
                         }
                     } else {
-                        // Show the global toggle list (desktop)
+                        // Show the global toggle list
                         const itemEl = createSettingItem(directGroup.items[0]);
-                        itemEl.classList.add('full-width-item');
                         itemsContainer.appendChild(itemEl);
                     }
                 }
@@ -1174,10 +1109,12 @@ function createSettingItem(item) {
     wrapper.className = 'setting-item';
     wrapper.dataset.key = item.key;
 
-    const label = document.createElement('label');
-    label.className = 'setting-label';
-    label.textContent = formatLabel(item.key);
-    wrapper.appendChild(label);
+    if (item.type !== 'toggle_list') {
+        const label = document.createElement('label');
+        label.className = 'setting-label';
+        label.textContent = formatLabel(item.key);
+        wrapper.appendChild(label);
+    }
 
     if (item.description) {
         const desc = document.createElement('p');
