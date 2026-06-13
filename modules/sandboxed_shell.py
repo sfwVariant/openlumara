@@ -179,7 +179,7 @@ class SandboxedShell(core.module.Module):
 
         while True:
             try:
-                await asyncio.sleep(0.5)
+                await asyncio.sleep(2)
 
                 if not self.container_name or not self.runtime:
                     continue
