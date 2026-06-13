@@ -15,6 +15,9 @@ class StorageList(list):
         if not path:
             path = core.get_data_path()
 
+        # prevent autoloads while saving
+        self.currently_saving = False
+
         self.path = core.sandbox_path(path, name)
         self.name = os.path.basename(self.path)
         self.binary = False
@@ -80,6 +83,8 @@ class StorageList(list):
         if TEMPORARY:
             return True
 
+        self.currently_saving = True
+
         match self.type:
             case "json":
                 self._write(json.dumps(self, indent=2))
@@ -90,6 +95,8 @@ class StorageList(list):
             case "text":
                 if len(self) > 0:
                     self._write("\n".join(self))
+
+        self.currently_saving = False
 
     def load(self, data=None):
         """load content from file or data argument"""
@@ -114,7 +121,7 @@ class StorageList(list):
                 self.extend(data.split("\n"))
 
     def get(self, *args, **kwargs):
-        if not TEMPORARY:
+        if not self.currently_saving and not TEMPORARY:
             self.load()
 
         return super().get(*args)
@@ -127,6 +134,9 @@ class StorageDict(dict):
         # default to openlumara data folder if no path specified
         if not path:
             path = core.get_data_path()
+
+        # prevent autoloads while saving
+        self.currently_saving = False
 
         self.path = core.sandbox_path(path, name)
 
@@ -241,6 +251,8 @@ class StorageDict(dict):
         if TEMPORARY:
             return True
 
+        self.currently_saving = True
+
         match self.type:
             case "json":
                 self._write(json.dumps(dict(self), indent=2))
@@ -308,6 +320,8 @@ class StorageDict(dict):
                 if len(self) > 0:
                     self._write("\n".join(dict(self)))
 
+        self.currently_saving = False
+
     def load(self, data=None):
         """load content from file or data argument"""
         self.clear()
@@ -356,7 +370,7 @@ class StorageDict(dict):
         return True
 
     def get(self, *args, **kwargs):
-        if not TEMPORARY:
+        if not self.currently_saving and not TEMPORARY:
             self.load()
 
         return super().get(*args)
@@ -369,6 +383,9 @@ class StorageText:
         # default to openlumara data folder if no path specified
         if not path:
             path = core.get_data_path()
+
+        # prevent autoloads while saving
+        self.currently_saving = False
 
         self.path = core.sandbox_path(path, name)
 
@@ -387,7 +404,7 @@ class StorageText:
         self._data = str(new_data)
         self.save()
     def get(self):
-        if not TEMPORARY:
+        if not self.currently_saving and not TEMPORARY:
             self.load()
         return str(self._data)
 
@@ -403,7 +420,11 @@ class StorageText:
         if TEMPORARY:
             return self
 
+        self.currently_saving = True
+
         with open(self.path, "w", encoding="utf-8") as f:
             f.write(self._data)
+
+        self.currently_saving = False
 
         return self
