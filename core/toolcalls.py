@@ -122,6 +122,8 @@ class ToolcallManager:
         if push:
             await self.channel.push(assistant_message)
 
+        timeout_val = float(core.config.get("core", "tool_timeout", default=10.0))
+
         # execute each tool and add their responses
         for tool_call_dict in repaired_tool_calls:
             tool_name = tool_call_dict['function']['name']
@@ -171,7 +173,18 @@ class ToolcallManager:
                         return await func_callable(**tool_args)
 
                     # add a timeout so that tools can't hang the application forever
-                    func_response = await asyncio.wait_for(_run_tool(), timeout=float(core.config.get("core", "tool_timeout", default=10.0)))
+                    func_response = await asyncio.wait_for(_run_tool(), timeout=timeout_val)
+
+                except asyncio.TimeoutError as e:
+                    err_msg = core.detail_error(e) if core.debug else str(e)
+                    func_response = module_instance.result(f"Tool timed out after {timeout_val}s", success=False)
+                    core.log("toolcall", func_response.get("content"))
+                except Exception as e:
+                    err_msg = core.detail_error(e) if core.debug else str(e)
+                    func_response = module_instance.result(f"Error while executing tool: {err_msg}", success=False)
+                    core.log("toolcall", func_response.get("content"))
+                finally:
+                    func_response_str = None
 
                     # don't double-escape strings
                     if isinstance(func_response, str):
@@ -179,7 +192,7 @@ class ToolcallManager:
                     else:
                         func_response_str = json.dumps(func_response)
 
-                    # then build the openai toolcall response object
+                    # build the openai toolcall response object
                     tool_response = {
                         "role": "tool",
                         "tool_call_id": tool_call_dict['id'],
@@ -189,26 +202,12 @@ class ToolcallManager:
                     # yield it so it can be displayed immediately
                     yield {"type": "tool", "tool_call_id": tool_call_dict['id'], "content": func_response_str}
 
-                except Exception as e:
-                    core.log_error("Tool execution failed", e)
-                    err_msg = core.detail_error(e) if core.debug else str(e)
+                    # add the tool response to the context window
+                    await self.channel.context.chat.add(tool_response)
 
-                    # build an openai-compliant tool error object
-                    tool_response = {
-                        "role": "tool",
-                        "tool_call_id": tool_call_dict['id'],
-                        "content": f"error: {err_msg}"
-                    }
-
-                    # yield it so it can be displayed immediately
-                    yield {"type": "tool", "tool_call_id": tool_call_dict['id'], "content": f"error: {str(e)}"}
-
-                # add the tool response to the context window
-                await self.channel.context.chat.add(tool_response)
-
-                # push it if needed
-                # if push:
-                #     await self.channel.push(tool_response)
+                    # push it if needed
+                    # if push:
+                    #     await self.channel.push(tool_response)
             else:
                 core.log(
                     "toolcall",
