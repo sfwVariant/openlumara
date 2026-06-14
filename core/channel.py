@@ -663,6 +663,9 @@ class Channel:
     async def on_install(self):
         """Overridable method that triggers when the auto-installer installs the dependencies for a channel"""
         pass
+    async def on_uninstall(self):
+        """Overridable method that triggers when the auto-installer uninstalls the dependencies for a channel"""
+        pass
 
     async def push(self, message):
         """
