@@ -60,23 +60,64 @@ function scheduleWsReconnect() {
 }
 
 function handlePromptProgress(prog) {
-    const cache = prog.cache || 0;
-    const processed = prog.processed - cache;
-    const total = prog.total - cache;
+    let progressData = prog;
+    try {
+        if (typeof prog === 'string') {
+            progressData = JSON.parse(prog);
+        }
+    } catch (e) {
+        console.error('[DEBUG] Failed to parse progress data:', e);
+        return;
+    }
+
+    const cache = progressData.cache || 0;
+    const processed = progressData.processed - cache;
+    const total = progressData.total - cache;
     const percent = total > 0 ? Math.round((processed / total) * 100) : 0;
-    const elapsed = prog.time_ms / 1000;
+    const elapsed = progressData.time_ms / 1000;
     const remaining = (total - processed) > 0 ? (elapsed / processed) * (total - processed) : 0;
 
-    // Update Tool Processing Indicator if it exists
+    // 1. Handle Creation if not exists
+    if (!fancyProcessingIndicator) {
+        console.log('[DEBUG] Creating prompt processing indicator');
+        fancyProcessingIndicator = document.createElement('div');
+        fancyProcessingIndicator.className = 'prompt-processing-indicator-wrapper tool-processing-content';
+
+        // Ensure typing is available and we are in the chat
+        const target = (typeof typing !== 'undefined' && typing) ? typing : chat;
+        chat.insertBefore(fancyProcessingIndicator, target);
+
+        fancyProcessingIndicator.innerHTML = `
+        <div class="prompt-processing-indicator">
+        <div class="progress-header">
+        <span class="prompt-processing-percent">0%</span>
+        <span class="prompt-processing-eta" style="opacity: 0.7">(ETA: 0s)</span>
+        </div>
+        <div class="prompt-progress-bar">
+        <div class="prompt-progress-bar-fill" style="width: 0%"></div>
+        </div>
+        </div>
+        `;
+
+        // Cache DOM references
+        progressBarFill = fancyProcessingIndicator.querySelector('.prompt-progress-bar-fill');
+        progressTextPercent = fancyProcessingIndicator.querySelector('.prompt-processing-percent');
+        progressTextETA = fancyProcessingIndicator.querySelector('.prompt-processing-eta');
+
+        TypewriterAudioManager.playProcessingSound();
+        scrollToBottom();
+    }
+
+    // 2. Update Tool Processing Indicator if it exists
     if (typeof toolProcessingIndicatorElement !== 'undefined' && toolProcessingIndicatorElement && toolProcessingIndicatorElement.updateProgress) {
         toolProcessingIndicatorElement.updateProgress(percent);
     }
 
-    // Update progress bar and text
-    if (typeof progressBarFill !== 'undefined' && progressBarFill) {
+    // 3. Update progress bar and text (Direct DOM manipulation)
+    if (progressBarFill) {
         progressBarFill.style.width = `${percent}%`;
     }
-    if (typeof progressTextPercent !== 'undefined' && progressTextPercent && typeof progressTextETA !== 'undefined' && progressTextETA) {
+    if (progressTextPercent && progressTextETA) {
         progressTextPercent.textContent = `${percent}%`;
         progressTextETA.textContent = `(ETA: ${Math.ceil(remaining)}s)`;
     }
@@ -143,7 +184,12 @@ function handleWebSocketMessage(data) {
             tokenContent = data.content;
         }
 
-        console.log(data);
+        console.log(data.message);
+
+        if (tokenType === 'token_usage') {
+            updateTokenUsage();
+            return;
+        }
 
         // Handle prompt progress
         if (tokenType === 'prompt_progress') {
