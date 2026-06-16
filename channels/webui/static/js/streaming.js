@@ -385,8 +385,6 @@ async function stopGeneration(sent_from_command = false) {
 
     TypewriterAudioManager.stopProcessingSound();
 
-    // Sync UI
-    await syncMessages();
     finishStream();
 }
 

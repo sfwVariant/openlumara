@@ -857,10 +857,15 @@ async function loadChatInternal(chatId, cachedMessages = null) {
     }
 }
 
-async function updateTokenUsage() {
+async function updateTokenUsage(token=null) {
     try {
-        const response = await fetch('/api/token_usage');
-        const data = await response.json();
+        let data = null;
+        if (!token) {
+            const response = await fetch('/api/token_usage');
+            data = await response.json();
+        } else {
+            data = token;
+        }
 
         if (data.current !== undefined && data.max !== undefined) {
             const container = document.getElementById('token-usage-container');
@@ -1410,7 +1415,6 @@ async function clearChat() {
             // Reload
             if (currentChatId) {
                 await loadChat(currentChatId);
-                syncMessages();
             }
             await loadChats();
         }

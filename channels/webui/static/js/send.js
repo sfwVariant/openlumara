@@ -155,10 +155,6 @@ async function sendCommand(message) {
             }
 
             removePlaceholder();
-
-            if (!isStreaming) {
-                await syncMessages();
-            }
         }
 
         const chatResponse = await fetch('/chat/current');

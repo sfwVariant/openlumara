@@ -23,7 +23,6 @@ function connectWebSocket() {
 
     wsSocket.onopen = () => {
         console.log('WebSocket connected');
-        wsReconnectAttempts = 0;
         isWsConnected = true;
         updateConnectionStatus('connected');
     };
@@ -77,12 +76,11 @@ function handlePromptProgress(prog) {
     const remaining = (total - processed) > 0 ? (elapsed / processed) * (total - processed) : 0;
 
     // 1. create indicator
-    if (!fancyProcessingIndicatorCreated && !catchingUpFromBuffer) {
+    if (!fancyProcessingIndicatorCreated) {
         fancyProcessingIndicator = document.createElement('div');
         fancyProcessingIndicator.className = 'prompt-processing-indicator-wrapper tool-processing-content';
 
-        const target = (typeof typing !== 'undefined' && typing) ? typing : chat;
-        chat.insertBefore(fancyProcessingIndicator, target);
+        chat.appendChild(fancyProcessingIndicator);
 
         fancyProcessingIndicator.innerHTML = `
         <div class="prompt-processing-indicator">
@@ -127,6 +125,19 @@ function handlePromptProgress(prog) {
 function processToken(msg, isSimulated = false) {
     const type = msg.type || 'content';
     const content = msg.content || '';
+
+    // show ongoing prompt processing progress
+    if (type === 'prompt_progress') {
+        handlePromptProgress(content);
+        return;
+    } else {
+        // create the ai message wrapper
+        if (!window._currentAiMsgDiv) {
+            createAiWrapper();
+        } else if (window._currentAiWrapper && !window._currentAiWrapper.parentNode) {
+            chat.insertBefore(window._currentAiWrapper, typing);
+        }
+    }
 
     // 1. Handle Reasoning
     if (type === 'reasoning' && content) {
@@ -266,20 +277,8 @@ function handleWebSocketMessage(data) {
 
         // Metadata/Control tokens
         if (tokenType === 'token_usage') {
-            updateTokenUsage();
+            updateTokenUsage(msgPayload);
             return;
-        }
-
-        if (tokenType === 'prompt_progress') {
-            handlePromptProgress(data.message ? data.message.content : data.content);
-            return;
-        }
-
-        // Real-time token processing
-        if (!window._currentAiMsgDiv) {
-            createAiWrapper();
-        } else if (window._currentAiWrapper && !window._currentAiWrapper.parentNode) {
-            chat.insertBefore(window._currentAiWrapper, typing);
         }
 
         processToken(msgPayload, false);

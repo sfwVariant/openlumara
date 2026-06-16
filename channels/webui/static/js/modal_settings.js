@@ -3791,19 +3791,6 @@ toggleModal = function(modalName) {
     document.body.classList.toggle('token-bar-hidden', !isVisible);
 })();
 
-// Settings Sidebar Buttons
-document.getElementById('settings-log-btn').addEventListener('click', () => {
-    toggleModal('log');
-});
-
-document.getElementById('settings-restart-btn').addEventListener('click', async () => {
-    const confirmed = await showConfirmDialog("Are you sure you want to restart the server? This will disconnect the web UI momentarily.");
-    if (confirmed) {
-        restartServer();
-    }
-});
-
-
 // Create reasoning effort slider
 function createReasoningEffortSlider(key, value) {
     const wrapper = document.createElement('div');

@@ -81,10 +81,6 @@ async function saveEdit(index, newContent) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ index: index, content: newContent })
         });
-
-        if (response.ok) {
-            await syncMessages();
-        }
     } catch (err) {
         console.error('Failed to edit message:', err);
     }
@@ -97,7 +93,6 @@ async function saveEdit(index, newContent) {
 
 async function cancelEdit() {
     editingIndex = null;
-    await syncMessages();
 }
 
 async function deleteMessage(index) {

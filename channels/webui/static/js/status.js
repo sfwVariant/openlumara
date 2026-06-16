@@ -148,8 +148,6 @@ async function checkConnection() {
                     if (lastActiveChatId) {
                         await loadChat(lastActiveChatId);
                         lastActiveChatId = null;
-                    } else {
-                        await syncMessages();
                     }
 
                     hideConnectionStatus();
