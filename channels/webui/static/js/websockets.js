@@ -232,8 +232,6 @@ function processToken(msg, isSimulated = false) {
 }
 
 function handleWebSocketMessage(data) {
-    console.log(data);
-
     // Handle typed messages from backend
     if (data.type === 'sync_state') {
         if (data.buffer.length > 0) {
@@ -361,6 +359,10 @@ function handleWebSocketMessage(data) {
     }
 
     if (data.type === 'push') {
+        if (data.message.content) {
+            showNotification(data.message.content, localStorage.getItem('notification_timeout'));
+        }
+
         handleNewMessage(data.message);
         return;
     }
