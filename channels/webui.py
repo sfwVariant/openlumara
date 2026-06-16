@@ -37,7 +37,7 @@ WEBUI_DIR = core.get_path("channels/webui")
 # ordered list of javascript files, to load in this exact order
 JS_FILES = [
     "icons", "variables", "content_helpers", "markdown", "messages",
-    "msg_actions", "sidebar", "utils", "notif", "status", "polling", "chats",
+    "msg_actions", "sidebar", "utils", "notif", "status", "chats",
     "tags", "search", "export", "modals", "autocomplete", "input", "typewriter", "streaming", "send", "upload", "theming",
     "audio", "modal_settings", "storage_editor", "responsive", "websockets", "system_logs", "init"
 ]

@@ -100,13 +100,11 @@ async function send(providedContent = null) {
 
     // Send via WebSocket
     if (window.socket && window.socket.readyState === WebSocket.OPEN) {
-        console.log('[DEBUG] Sending user_message via WebSocket');
         window.socket.send(JSON.stringify({
             type: 'user_message',
             content: payloadBody
         }));
     } else {
-        console.error('[DEBUG] WebSocket not open.');
         showApiConfigError("Websocket connection is not ready. Please wait a bit and try again!", 'websocket_not_open');
         isStreaming = false;
         isDataStreaming = false;

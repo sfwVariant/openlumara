@@ -1100,3 +1100,32 @@ function clearStreamingToolCalls() {
     toolCallsContainer = null;
     clearProcessingIndicators();
 }
+
+/**
+ * Sync only message indices without re-rendering content.
+ * This is used after streaming completes to update the DOM indices.
+ */
+async function syncIndicesOnly() {
+    try {
+        const response = await fetch('/messages');
+        const data = await response.json();
+        const messages = data.messages || [];
+
+        // Update lastMessageIndex based on actual last message index
+        if (messages.length > 0) {
+            lastMessageIndex = messages[messages.length - 1].index + 1;
+        } else {
+            lastMessageIndex = 0;
+        }
+
+        // Update indices on streaming wrappers
+        const streamingWrappers = chat.querySelectorAll('.message-wrapper[data-index="streaming"]');
+        streamingWrappers.forEach(wrapper => {
+            wrapper.dataset.index = lastMessageIndex - 1;
+        });
+
+        updateTokenUsage();
+    } catch (err) {
+        console.error('Index sync failed:', err);
+    }
+}
