@@ -219,9 +219,6 @@ function createAiWrapper() {
     window._currentUseTypewriter = localStorage.getItem("typewriterEnabled") === 'true';
     window._currentUseStreamingSound = localStorage.getItem("tokenEnabled") === 'true';
 
-    typing.classList.toggle('show', false);
-    if (typing) { typing.style.display = ''; }
-
     if (fancyProcessingIndicator) {
         fancyProcessingIndicator.remove();
         fancyProcessingIndicator = null;
