@@ -131,6 +131,7 @@ class ToolcallManager:
 
             module_instance = None
             module_instance_display_name = None
+            method_name = None
 
             # find the module that has the requested tool
             # and store the instance and name of that module
@@ -149,14 +150,10 @@ class ToolcallManager:
                         break
 
             if module_instance:
-                # remove the module name from the tool name
-                module_identifier = f"{module_instance_display_name}_"
-                translated_tool_name = tool_name[len(module_identifier):]
-
                 if (
                     tool_name not in self.channel.manager.tool_names
                     or
-                    translated_tool_name in module_instance.disabled_tools
+                    method_name in module_instance.disabled_tools
                 ):
                     # don't allow disabled tools to be called
                     rejected_msg = json.dumps({"content": "That tool has been disabled by the user.", "status": "error"})
@@ -169,7 +166,7 @@ class ToolcallManager:
                     continue
 
                 # and use it to get the function object for that tool
-                func_callable = getattr(module_instance, translated_tool_name)
+                func_callable = getattr(module_instance, method_name)
 
                 # build a fancy toolcall display string
                 tool_call_str = self.display_call(tool_call_dict)
