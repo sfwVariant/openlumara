@@ -11,7 +11,7 @@ except ImportError:
     from importlib_metadata import version, PackageNotFoundError
 
 # modules that should have their prompts inserted even when tools are off
-nonagentic = ("characters", "time")
+nonagentic = ("characters", "writing_style", "time")
 
 reported_missing = []
 reported_broken = []
