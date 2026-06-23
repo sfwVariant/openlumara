@@ -376,7 +376,6 @@ class Manager:
         # re-add the module tools based on the new state (after on_ready's modifications)
         await self.load_module_tools(module)
 
-        self.log("core", f"Module {module_name} reloaded successfully")
         return True
 
     async def _initialize_api_connection(self):

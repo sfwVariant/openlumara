@@ -515,7 +515,35 @@ class Coder(core.module.Module):
             return self.result(f"Error: symbol '{symbol_name}' not found", success=False)
 
         node, _ = info
-        source_bytes = node.start_point
+
+        # Check if the target is a class to prevent reading entire classes
+        lang_config = self.LANGUAGES.get(language, {})
+        target_types = lang_config.get('symbol_types', {})
+        is_class = False
+
+        # Iterate through the language config to see if this node type maps to 'class'
+        for ts_type, type_str in target_types.items():
+            if node.type == ts_type and type_str == 'class':
+                is_class = True
+                break
+
+        if is_class:
+            # Extract the class name for the error message
+            class_name = symbol_name
+            for child in node.children:
+                if child.type in ['identifier', 'property_identifier', 'name', 'field_identifier']:
+                    try:
+                        class_name = child.text.decode('utf-8')
+                        break
+                    except:
+                        continue
+
+            return self.result(
+                f"Error: Cannot read entire class '{class_name}'. "
+                f"Read individual methods instead (e.g., '{class_name}.method_name').",
+                success=False
+            )
+
         parse_result = self._parse_file(file_path_str, language)
         if not parse_result:
             return self.result("Error: failed to parse file", success=False)

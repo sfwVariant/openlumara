@@ -1317,13 +1317,25 @@ async def load_settings(user: str = Depends(require_auth)):
     return core.config.config
 
 @app.post("/settings/save")
+@app.post("/settings/save")
 async def save_settings(request: Request, user: str = Depends(require_auth)):
-    form_data = await request.json()
+    data = await request.json()
+    form_data = data.get("settings", data)  # Support both formats
+    changed_modules = data.get("changed_modules", [])
+    
     result = core.config.config.load(data=form_data)
     core.config.config.save()
 
     if not result:
         raise HTTPException(status_code=500, detail="Something went wrong while saving settings!")
+
+    # Reload modules that had their settings changed
+    if changed_modules and channel_instance:
+        for module_name in changed_modules:
+            try:
+                await channel_instance.manager.reload_module(module_name)
+            except Exception as e:
+                channel_instance.log("webui", f"Error reloading module {module_name}: {core.detail_error(e)}")
 
     return {"success": True}
 

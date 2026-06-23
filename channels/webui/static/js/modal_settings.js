@@ -539,6 +539,7 @@ async function loadSettings() {
         // 2. If successful, update the master cache and the original reference
         settingsData = newData;
         settingsOriginal = JSON.parse(JSON.stringify(settingsData));
+        changedModuleSettings.clear();
 
         // 3. Attempt to fetch module info (gracefully)
         try {
@@ -1818,6 +1819,9 @@ function updateToggleListData(key, enabledItems, allItems) {
 
     settingsHasChanges = JSON.stringify(settingsData) !== JSON.stringify(settingsOriginal);
     updateUnsavedIndicator();
+
+    // Note: Module enabled/disabled list changes are handled by server restart
+    // (via hasChannelOrModuleChanges), so we don't track them for individual reload.
 }
 
 // Create text input (with sensitive field detection)
@@ -2144,6 +2148,9 @@ function createObjectInput(key, value) {
 }
 
 // Handle setting change
+// Track which modules have had their settings changed (for reload-on-save)
+let changedModuleSettings = new Set();
+
 function handleSettingChange(key, value) {
     const parts = key.split('.');
     let current = settingsData;
@@ -2159,6 +2166,16 @@ function handleSettingChange(key, value) {
 
     settingsHasChanges = JSON.stringify(settingsData) !== JSON.stringify(settingsOriginal);
     updateUnsavedIndicator();
+
+    // Track which modules had settings changed
+    // Module settings keys look like: "modules.settings.mymodule.something"
+    // or "user_modules.settings.mymodule.something"
+    if (parts.length >= 4) {
+        if ((parts[0] === 'modules' || parts[0] === 'user_modules') && parts[1] === 'settings') {
+            const moduleName = parts[2];
+            changedModuleSettings.add(moduleName);
+        }
+    }
 }
 
 // Update unsaved changes indicator
@@ -2186,6 +2203,7 @@ function resetSettingsForm() {
 
     settingsData = JSON.parse(JSON.stringify(settingsOriginal));
     settingsHasChanges = false;
+    changedModuleSettings.clear();
 
     const categories = organizeSettingsIntoCategories(settingsData);
     renderSettingsForm(categories);
@@ -2219,7 +2237,10 @@ async function saveSettings() {
         const response = await fetch('/settings/save', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(settingsData),
+            body: JSON.stringify({
+                settings: settingsData,
+                changed_modules: Array.from(changedModuleSettings)
+            }),
                                      signal: AbortSignal.timeout(15000)
         });
 
@@ -2231,6 +2252,7 @@ async function saveSettings() {
         // Success: Update the original reference so "unsaved" indicator clears
         settingsOriginal = JSON.parse(JSON.stringify(settingsData));
         settingsHasChanges = false;
+        changedModuleSettings.clear();
 
         if (hasChannelOrModuleChanges) {
             await restartServer();
