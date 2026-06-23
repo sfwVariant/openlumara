@@ -1673,8 +1673,36 @@ function createToggleListInput(key, value, isModuleList = false) {
     // Use resolved value for getAllToggleItems to get current state
     const allItems = getAllToggleItems(resolvedValue);
     const enabledSet = new Set(resolvedValue.enabled || []);
-    const descriptions = resolvedValue.descriptions || {};
-    const unsafeModules = resolvedValue.unsafeModules || {};
+
+    // descriptions and unsafeModules are computed metadata from moduleInfoCache.
+    // On re-render they may be missing from the raw settingsData, so we fall back
+    // to the passed-in value's metadata or recompute from the cache.
+    let descriptions = resolvedValue.descriptions;
+    let unsafeModules = resolvedValue.unsafeModules;
+
+    if ((descriptions === undefined || descriptions === null) && value && value.descriptions) {
+        descriptions = value.descriptions;
+    }
+    if ((unsafeModules === undefined || unsafeModules === null) && value && value.unsafeModules) {
+        unsafeModules = value.unsafeModules;
+    }
+    // Final fallback: recompute from moduleInfoCache if still missing
+    if (descriptions === undefined || descriptions === null) {
+        descriptions = {};
+        for (const itemName in moduleInfoCache) {
+            if (moduleInfoCache[itemName].description) {
+                descriptions[itemName] = moduleInfoCache[itemName].description;
+            }
+        }
+    }
+    if (unsafeModules === undefined || unsafeModules === null) {
+        unsafeModules = {};
+        for (const itemName in moduleInfoCache) {
+            if (moduleInfoCache[itemName].unsafe) {
+                unsafeModules[itemName] = true;
+            }
+        }
+    }
 
     const sortedItems = allItems
     .filter(item => {

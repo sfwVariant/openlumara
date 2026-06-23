@@ -451,7 +451,7 @@ class Commands:
                     return "please provide a name of the module to toggle"
 
                 module_name = args[0]
-                all_modules = core.config.get("modules", "enabled", default=[]) + core.config.get("modules", "disabled", default=[])
+                all_modules = core.config.get("modules", "enabled", default=[]) + core.config.get("modules", "disabled", default=[]) + core.config.get("user_modules", "enabled", default=[]) + core.config.get("user_modules", "disabled", default=[])
 
                 if module_name not in all_modules:
                     return "module with that name doesn't exist"
