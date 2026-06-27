@@ -19,8 +19,7 @@ if %errorlevel% equ 0 (
         echo no upstream configured, skipping update check.
     ) else if "!LOCAL!" NEQ "!REMOTE!" (
         echo updates available! pulling changes...
-        :: im tired of git's quirks. if you have a fork of openlumara, don't use this update script, it's for end users. merge conflicts are going to kill my sanity.
-        git reset --hard origin/main
+        git pull
     ) else (
         echo already up to date.
     )

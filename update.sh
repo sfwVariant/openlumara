@@ -8,8 +8,7 @@ if git fetch origin 2>/dev/null; then
 
         if [ "$LOCAL" != "$REMOTE" ]; then
             echo "updates available! pulling changes..."
-            # im tired of git's quirks. if you have a fork of openlumara, don't use this update script, it's for end users. merge conflicts are going to kill my sanity.
-            git reset --hard origin/main
+            git pull
         else
             echo "already up to date."
         fi
