@@ -11,6 +11,10 @@ class ExampleModule(core.module.Module):
     This module docstring shows up as the module description all over the framework!
     """
 
+    # -------------------------
+    #   CONFIGURATION
+    # -------------------------
+
     # settings defined here will show up in all channels that support it (such as the webUI)
     # for the user to change as they see fit
     settings = {
@@ -37,6 +41,10 @@ class ExampleModule(core.module.Module):
     # list of dependencies that the module needs in order to work.
     # this is an example, leave empty if no dependencies are needed
     dependencies = ["pytest"]
+
+    # -------------------------
+    #   EVENT HANDLERS
+    # -------------------------
 
     async def on_ready(self):
         """ALWAYS use this instead of the class constructor (__init__) as it runs at the right time during the framework's startup sequence."""
@@ -93,6 +101,10 @@ class ExampleModule(core.module.Module):
         """This runs after the module's dependencies are uninstalled by the framework's auto-installer. Use it for post-uninstallation hooks."""
         pass
 
+    # -------------------------
+    #   AI TOOLS
+    # -------------------------
+
     # tools are simply class methods. the framework will read the definition
     # and translate the name, arguments and docstring to a tool usable by the AI
     # tools don't need a special decorator
@@ -108,6 +120,10 @@ class ExampleModule(core.module.Module):
 
         # always return results using self.result, which standardizes the json output emitted by toolcalls
         return self.result(f"Pong! latency: {latency}", success=True)
+
+    # -------------------------
+    #   USER-FACING COMMANDS
+    # -------------------------
 
     # commands are usable by the user only,
     # this one for example gives the user a `/ping` command,
