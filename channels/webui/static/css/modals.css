@@ -358,7 +358,7 @@
 }
 
 .json-string {
-    color: #a8d08d;
+    color: var(--accent);
 }
 
 .json-number {
