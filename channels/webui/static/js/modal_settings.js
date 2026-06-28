@@ -405,7 +405,7 @@ function flattenSettingsObject(obj, prefix, schema = {}, callback) {
                     else if (subSchema.type === 'select') actualType = 'select';
                     else if (subSchema.type === 'number') actualType = 'number';
                     else if (subSchema.type === 'slider') actualType = 'slider';
-                    else actualType = subSchema.type;
+                    else actualType = detectType(actualValue, fullKey);
                 } else if (isToggleList(actualValue)) {
                     actualType = 'toggle_list';
                 } else {

@@ -325,25 +325,32 @@ class Manager:
 
     async def toggle_module(self, module_name: str, autorestart=True):
         modules = core.config.config["modules"]
-        enabled = modules["enabled"]
-        disabled = modules["disabled"]
+        user_modules = core.config.config["user_modules"]
 
-        if module_name in enabled:
-            enabled.remove(module_name)
-            disabled.append(module_name)
-        elif module_name in disabled:
-            disabled.remove(module_name)
-            enabled.append(module_name)
-        else:
-            return False
+        toggled = False
+        for module_list in [modules, user_modules]:
+            enabled = module_list["enabled"]
+            disabled = module_list["disabled"]
 
-        core.config.config.save()
+            if module_name in enabled:
+                enabled.remove(module_name)
+                disabled.append(module_name)
+                toggled = True
+            elif module_name in disabled:
+                disabled.remove(module_name)
+                enabled.append(module_name)
+                toggled = True
+            else:
+                continue
 
-        if autorestart:
-            if self.channel:
-                await self.channel.push("restarting to apply module change..")
-            await asyncio.sleep(0.1)
-            await self.channel.manager.restart()
+        if toggled:
+            core.config.config.save()
+
+            if autorestart:
+                if self.channel:
+                    await self.channel.push("restarting to apply module change..")
+                await asyncio.sleep(0.1)
+                await self.channel.manager.restart()
 
         return True
 
