@@ -898,7 +898,7 @@ async def send_message(request: Request, user: str = Depends(require_auth)):
     current_title = await channel_instance.context.chat.get_title()
 
     await manager.broadcast({"type": "messages_updated", "messages": messages})
-    await manager.broadcast({"type": "stream_complete"})
+    await manager.broadcast({"type": "stream_complete", "buffer": [], "index": next_index})
 
     return {
         'response': response, 'total': len(messages),

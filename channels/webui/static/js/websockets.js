@@ -1,5 +1,6 @@
 let wsSocket = null;
 let fancyProcessingIndicatorCreated = false;
+let responseStartSoundPlayed = false;
 let catchingUpFromBuffer = false;
 const BUFFER_BATCH_SIZE = 50; // Tokens per batch
 
@@ -203,6 +204,11 @@ function processToken(msg, isSimulated = false) {
         chat.insertBefore(window._currentAiWrapper, typing);
     }
 
+    if (!responseStartSoundPlayed) {
+        TypewriterAudioManager.play('response_start');
+        responseStartSoundPlayed = true;
+    }
+
     // 1. Handle Reasoning
     if (type === 'reasoning' && content) {
         clearProcessingIndicators();
@@ -328,6 +334,10 @@ function processBuffer(buffer) {
 }
 
 function handleWebSocketMessage(data) {
+    if (data.type !== 'token') {
+        console.log(data);
+    }
+
     // Handle typed messages from backend
     if (data.type === 'sync_state') {
         if (data.buffer.length > 0) {
@@ -363,9 +373,6 @@ function handleWebSocketMessage(data) {
         sending_status.className = 'placeholder-status';
         sending_status.textContent = 'Sending...';
         msgEl.querySelector('.message').appendChild(sending_status);
-
-        // play the sound
-        TypewriterAudioManager.play('send_message');
 
         // clean up the upload queue
         if (window.upload_queue) {
@@ -426,27 +433,27 @@ function handleWebSocketMessage(data) {
         isStreaming = false;
         streamStarted = false;
         fancyProcessingIndicatorCreated = false;
+        responseStartSoundPlayed = false;
         updateStopButtonState();
 
-        if (!window._currentAiWrapper) {
-            return;
-        }
+        if (window._currentAiWrapper) {
+            window._currentAiWrapper.dataset.index = data.index;
 
-        window._currentAiWrapper.dataset.index = data.index;
-
-        if (typeof isTypewriterRunning === 'undefined' || !isTypewriterRunning) {
-            if (window._currentAiWrapper) {
-                finalizeStreamingUI(window._currentAiWrapper, window._currentAiMsgDiv);
-            }
-        } else {
-            waitForTypewriter().then(() => {
+            if (typeof isTypewriterRunning === 'undefined' || !isTypewriterRunning) {
                 if (window._currentAiWrapper) {
                     finalizeStreamingUI(window._currentAiWrapper, window._currentAiMsgDiv);
                 }
-            });
+            } else {
+                waitForTypewriter().then(() => {
+                    if (window._currentAiWrapper) {
+                        finalizeStreamingUI(window._currentAiWrapper, window._currentAiMsgDiv);
+                    }
+                });
+            }
+            window._streamInitialized = false;
         }
-        window._streamInitialized = false;
-        return;
+
+        setInputState(false, false, false);
     }
 
     if (data.type === 'messages_updated') {
@@ -542,6 +549,10 @@ function handleNewMessage(msg) {
     if (msg.index < lastMessageIndex) return;
 
     msgEl = renderSingleMessage(msg, msg.index, true);
+
+    if (msg.role !== 'user') {
+        TypewriterAudioManager.play('response_start');
+    }
 
     lastMessageIndex = msg.index + 1;
     scrollToBottom();
