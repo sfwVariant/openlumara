@@ -136,6 +136,11 @@ class Manager:
             last_channel = self.savedata.get("last_channel")
             if last_channel and last_channel in self.channels.keys():
                 self.channel = self.channels[last_channel]
+            else:
+                self.channel = self.channels.get('cli')
+                if not self.channel:
+                    print("ERROR: This is your first startup of openlumara and you have the CLI channel disabled. Please enable it for initial setup.")
+                    exit(1)
 
         # display any error messages that were emitted
         # by the framework before the manager was initialized
