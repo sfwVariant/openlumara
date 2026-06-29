@@ -162,7 +162,6 @@ class Channel:
         while not getattr(self, "_shutting_down", False):
             try:
                 message = await self.push_queue.get()
-                await self.context.chat.add(message)
                 await self.on_push(self.format_message(message))
                 self.push_queue.task_done()
             except asyncio.CancelledError:
@@ -754,10 +753,8 @@ class Channel:
         # if dict, just use it as-is
         # otherwise, turn it into an openAI message dict
         if isinstance(message, dict):
+            self.context.chat.add(message)
             await self.push_queue.put(message)
-            # if add_to_context:
-            #      self.context.chat.add(message)
         else:
+            await self.context.chat.add({"role": "assistant", "content": str(message)})
             await self.push_queue.put({"role": "assistant", "content": str(message)})
-            # if add_to_context:
-            #     await self.context.chat.add({"role": "assistant", "content": str(message)})

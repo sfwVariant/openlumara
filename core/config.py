@@ -75,7 +75,8 @@ DEFAULT_MODULES = (
     "calendar",
     "calculator",
     "token_threshold",
-    "time"
+    "time",
+    "auto_backup"
 )
 
 DEFAULT_CHANNELS = ["cli", "webui"]
