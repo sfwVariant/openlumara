@@ -353,7 +353,6 @@ Use tools if needed. For simple reminders, do not use tools.
         if final_content and job_channel:
             try:
                 await job_channel.push(final_content)
-                await job_channel.context.chat.add({"role": "assistant", "content": final_content})
             except Exception as e:
                 self.log_error(f"[SCHEDULER] error announcing job {job_id} result", e)
 

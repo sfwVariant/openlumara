@@ -162,6 +162,7 @@ class Channel:
         while not getattr(self, "_shutting_down", False):
             try:
                 message = await self.push_queue.get()
+                await self.context.chat.add(message)
                 await self.on_push(self.format_message(message))
                 self.push_queue.task_done()
             except asyncio.CancelledError:
@@ -728,7 +729,6 @@ class Channel:
     async def push(self, message):
         """
         push a message to the push queue, which will instantly display it in all channels
-        without adding to context, making it invisible to the AI
         """
 
         if not hasattr(self, "push_queue"):
@@ -745,33 +745,3 @@ class Channel:
             await self.push_queue.put({"role": "assistant", "content": str(message)})
             # if add_to_context:
             #     await self.context.chat.add({"role": "assistant", "content": str(message)})
-
-    async def announce(self, message: str, type=None, insert_message=True):
-        """called externally to announce things in this channel, such as a reminder sent by the AI"""
-        if not type:
-            type = "info"
-
-        # insert announced message into context
-        if insert_message:
-            await self.context.chat.add({"role": "assistant", "content": f"[System {type}]: {message}"})
-
-        # and push it
-        await self.push(message)
-
-    async def announce_all(self, message: str, type=None):
-        """announces a message across all channels. useful for very important notifications!"""
-        if not type:
-            type = "info"
-
-        should_insert = True
-        for channel_name, channel in self.manager.channels.items():
-            await channel.announce(message, type, insert_message=should_insert)
-
-            if should_insert:
-                # insert into context only once
-                should_insert = False
-        return
-
-    async def ask(self, message: str):
-        """sends a message in the channel and then intercepts communication for one message so that user can be asked for input without that input being sent to the LLM. useful for menus."""
-        raise NotImplementedError
