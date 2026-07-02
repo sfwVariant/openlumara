@@ -592,7 +592,7 @@ class APIClient():
 
     async def list_models(self):
         if not self.connected:
-            return []
+            await self.connect()
 
         try:
             # get alphabetically sorted model list
