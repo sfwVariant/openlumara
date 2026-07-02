@@ -616,7 +616,7 @@ class Channel:
         if not strings:
             if use_markdown:
                 strings = {
-                    "thinking_header": "**Thinking**\n> ",
+                    "thinking_header": "**Thinking**",
                     "thinking_str": "*thinking..*",
                     "conclusion_header": "**Conclusion**",
                     "processing_tool": "(processing results..)",
