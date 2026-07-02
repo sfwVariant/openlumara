@@ -618,7 +618,7 @@ class Channel:
                 strings = {
                     "thinking_header": "**Thinking**\n> ",
                     "thinking_str": "*thinking..*",
-                    "conclusion_header": "**Conclusion**",
+                    "conclusion_header": "\n\n**Conclusion**",
                     "processing_tool": "(processing results..)",
                     "thinking_newline": "\n> "
                 }
