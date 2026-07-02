@@ -98,7 +98,7 @@ async function send(providedContent = null) {
             content: payloadBody
         });
         // Show a brief notification that the message is queued
-        showChaterror('Message queued — will send when reconnected.');
+        showChatError('Message queued — will send when reconnected.');
     }
 }
 
