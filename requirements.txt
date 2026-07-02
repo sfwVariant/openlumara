@@ -5,3 +5,4 @@ pyyaml
 json-repair
 python-ulid
 requests
+httpx
