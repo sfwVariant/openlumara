@@ -734,8 +734,7 @@ async def api_disconnect(user: str = Depends(require_auth)):
 async def list_models(user: str = Depends(require_auth)):
     if not channel_instance:
         raise HTTPException(status_code=500, detail="Channel not available")
-    if not channel_instance.manager.API.connected:
-        raise HTTPException(status_code=503, detail="Not connected to API")
+
     try:
         models = await channel_instance.manager.API.list_models()
         return {'models': models}
