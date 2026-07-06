@@ -527,6 +527,10 @@ class Manager:
                 else:
                     sysprompt_middle.append(prompt_chunk)
 
+        custom_system_prompt = core.config.get("model", "system_prompt", default="")
+        if custom_system_prompt:
+            sysprompt_top.insert(0, f"# System prompt\n{str(custom_system_prompt).strip()}")
+
         system_prompt = sysprompt_top+sysprompt_middle+sysprompt_bottom
 
         if system_prompt:

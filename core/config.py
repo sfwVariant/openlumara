@@ -34,7 +34,12 @@ default_config = {
     },
     "model": {
         "name": "",
+        "system_prompt": "",
         "temperature": 0.7,
+        "top_k": None,
+        "top_p": None,
+        "min_p": None,
+        "n_sigma": None,
         "enable_thinking": True,
         "keep_reasoning_in_context": True,
         "only_preserve_reasoning_for_current_agentic_loop": True,
