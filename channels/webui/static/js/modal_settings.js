@@ -111,7 +111,7 @@ function organizeSettingsIntoCategories(originalData, moduleInfo = {}) {
 
         const category = topKey;
         categories[category] = {
-            title: formatLabel(category),
+            title: category === 'model' ? 'Models' : formatLabel(category),
             description: CATEGORY_DESCRIPTIONS[category] || `Configure ${formatLabel(category).toLowerCase()}`,
             groups: new Map(),
             order: order++
@@ -329,7 +329,8 @@ function organizeSettingsIntoCategories(originalData, moduleInfo = {}) {
                 addToGroup('_direct_', null, {
                     key: `${category}.${key}`,
                     value: value,
-                    type: detectType(value, `${category}.${key}`)
+                    type: detectType(value, `${category}.${key}`),
+                    description: FIELD_DESCRIPTIONS[`${category}.${key}`] || null
                 }, true);
             }
 
@@ -438,6 +439,12 @@ function detectType(value, key = '') {
     if (key.endsWith('reasoning_effort')) {
         return 'reasoning_effort_slider';
     }
+    if (key === 'model.system_prompt' || key.endsWith('.model.system_prompt')) {
+        return 'textarea';
+    }
+    if (["model.top_k", "model.top_p", "model.min_p", "model.n_sigma"].includes(key)) {
+        return 'number';
+    }
     if (value === null || value === undefined) return 'text';
     if (typeof value === 'boolean') return 'boolean';
     if (typeof value === 'number' && !key.toLowerCase().endsWith('id')) return 'number';
@@ -457,7 +464,12 @@ function detectType(value, key = '') {
 // Field descriptions (optional, can be empty)
 const FIELD_DESCRIPTIONS = {
     'api.key': 'API authentication key',
-    'model.name': 'The AI model to use for responses'
+    'model.name': 'The AI model to use for responses',
+    'model.system_prompt': 'Custom instructions added to the beginning of the system prompt',
+    'model.top_k': 'Sampler setting: limit token choices to the top K candidates. Leave blank to omit.',
+    'model.top_p': 'Sampler setting: nucleus sampling probability. Leave blank to omit.',
+    'model.min_p': 'Sampler setting: minimum probability threshold. Leave blank to omit.',
+    'model.n_sigma': 'Sampler setting: sigma sampling cutoff. Leave blank to omit.'
 };
 
 // Flatten nested object to dot-notation keys
@@ -2001,15 +2013,18 @@ function createTextareaInput(key, value) {
 // Create number input
 function createNumberInput(key, value) {
     // Get current value from live settingsData (for re-render safety)
-    const currentValue = getCurrentValue(key) ?? 0;
+    const currentValue = getCurrentValue(key);
 
     const input = document.createElement('input');
     input.type = 'number';
     input.className = 'setting-input';
     input.dataset.key = key;
-    input.value = currentValue;
+    input.value = currentValue ?? '';
     input.step = Number.isInteger(currentValue) ? '1' : '0.01';
-    input.oninput = () => handleSettingChange(key, parseFloat(input.value) || 0);
+    input.oninput = () => {
+        const rawValue = input.value.trim();
+        handleSettingChange(key, rawValue === '' ? null : Number(rawValue));
+    };
     return input;
 }
 

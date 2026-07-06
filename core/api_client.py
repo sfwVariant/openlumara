@@ -193,11 +193,13 @@ class APIClient():
             # allow switching tools off globally
             tools = None
 
+        model_config = core.config.get("model", {})
+
         req = {
             "model": self._model,
             "messages": context,
             "stream": stream,
-            "temperature": core.config.get("model", {}).get("temperature", 0.2),
+            "temperature": model_config.get("temperature", 0.2),
             "max_completion_tokens": core.config.get("api", {}).get("max_output_tokens", 8192),
             "extra_body": {
                 "chat_template_kwargs": {
@@ -206,6 +208,11 @@ class APIClient():
                 "return_progress": True
             }
         }
+
+        for sampler_setting in ("top_k", "top_p", "min_p", "n_sigma"):
+            sampler_value = model_config.get(sampler_setting)
+            if sampler_value is not None:
+                req[sampler_setting] = sampler_value
 
         if tools:
             req["tools"] = tools
@@ -263,6 +270,10 @@ class APIClient():
                     "tool_count": tool_count,
                     "max_completion_tokens": req.get("max_completion_tokens"),
                     "temperature": req.get("temperature"),
+                    "top_k": req.get("top_k"),
+                    "top_p": req.get("top_p"),
+                    "min_p": req.get("min_p"),
+                    "n_sigma": req.get("n_sigma"),
                     "reasoning_effort": req.get("reasoning_effort"),
                     "custom_field_keys": custom_field_keys,
                     "messages": message_summary,
