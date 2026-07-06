@@ -209,10 +209,15 @@ class APIClient():
             }
         }
 
+        # OpenAI's Python client validates keyword arguments before sending the
+        # request. Some OpenAI-compatible backends support sampler controls that
+        # are not part of the client method signature (for example ``top_k``),
+        # so place them in ``extra_body`` where the client merges them into the
+        # JSON payload without treating them as Python kwargs.
         for sampler_setting in ("top_k", "top_p", "min_p", "n_sigma"):
             sampler_value = model_config.get(sampler_setting)
             if sampler_value is not None:
-                req[sampler_setting] = sampler_value
+                req["extra_body"][sampler_setting] = sampler_value
 
         if tools:
             req["tools"] = tools
@@ -270,10 +275,10 @@ class APIClient():
                     "tool_count": tool_count,
                     "max_completion_tokens": req.get("max_completion_tokens"),
                     "temperature": req.get("temperature"),
-                    "top_k": req.get("top_k"),
-                    "top_p": req.get("top_p"),
-                    "min_p": req.get("min_p"),
-                    "n_sigma": req.get("n_sigma"),
+                    "top_k": req.get("extra_body", {}).get("top_k"),
+                    "top_p": req.get("extra_body", {}).get("top_p"),
+                    "min_p": req.get("extra_body", {}).get("min_p"),
+                    "n_sigma": req.get("extra_body", {}).get("n_sigma"),
                     "reasoning_effort": req.get("reasoning_effort"),
                     "custom_field_keys": custom_field_keys,
                     "messages": message_summary,
