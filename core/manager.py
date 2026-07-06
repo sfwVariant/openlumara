@@ -707,6 +707,29 @@ class Manager:
 
         return descriptions, clean_doc
 
+    def _get_tool_description(self, module, func_name, docstring):
+        """Return an OpenAI-compatible non-empty tool description."""
+        if docstring:
+            return docstring
+
+        module_doc = type(module).__doc__ if type(module).__doc__ != core.module.Module.__doc__ else None
+        module_summary = inspect.cleandoc(module_doc).splitlines()[0].strip() if module_doc else ""
+        readable_func_name = func_name.replace("_", " ")
+
+        if module_summary:
+            return f"{readable_func_name.capitalize()} tool from the {module.name} module. {module_summary}"
+
+        return f"{readable_func_name.capitalize()} tool from the {module.name} module."
+
+    def _get_tool_param_description(self, param_name, param):
+        """Return an OpenAI-compatible non-empty parameter description."""
+        readable_param_name = param_name.replace("_", " ")
+
+        if param.default == inspect.Parameter.empty:
+            return f"Required {readable_param_name} parameter."
+
+        return f"Optional {readable_param_name} parameter."
+
     async def load_module_tools(self, module):
         for func_name in type(module).__dict__:
             if func_name.startswith("_"):
@@ -766,28 +789,24 @@ class Manager:
                 func_param_desc = param_descriptions.get(param_name)
                 func_params_translated[param_name] = {"type": param_type}
 
-                # only insert param description if present
-                if func_param_desc:
-                    func_params_translated[param_name]["description"] = func_param_desc
+                func_params_translated[param_name]["description"] = (
+                    func_param_desc or self._get_tool_param_description(param_name, param)
+                )
 
             # build toolcall object
             tool = {
                 "type": "function",
                 "function": {
                     "name": f"{module.name}_{func_name}",
+                    "description": self._get_tool_description(module, func_name, docstring),
                     "parameters": {
                         "type": "object",
                         "properties": func_params_translated,
                         "required": required_args,
                         "additionalProperties": False,
                     },
-                    "strict": True,
                 },
             }
-
-            # only insert docstring if it's present
-            if docstring:
-                tool["function"]["description"] = docstring
 
             self.tools.append(tool)
             self.tool_names.append(tool["function"]["name"])

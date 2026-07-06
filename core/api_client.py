@@ -196,7 +196,6 @@ class APIClient():
         req = {
             "model": self._model,
             "messages": context,
-            "tools": tools,
             "stream": stream,
             "temperature": core.config.get("model", {}).get("temperature", 0.2),
             "max_completion_tokens": core.config.get("api", {}).get("max_output_tokens", 8192),
@@ -207,6 +206,9 @@ class APIClient():
                 "return_progress": True
             }
         }
+
+        if tools:
+            req["tools"] = tools
 
         # add kwargs to the request
         for key, value in kwargs.items():
